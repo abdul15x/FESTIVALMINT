@@ -1,8 +1,12 @@
 import { NextResponse } from 'next/server';
-import { getIntegrationReadiness } from '@/lib/env';
+import {
+  getDetailedIntegrationDiagnostics,
+  getIntegrationReadiness,
+} from '@/lib/env';
 
 export async function GET() {
   const readiness = getIntegrationReadiness();
+  const diagnostics = getDetailedIntegrationDiagnostics();
 
   return NextResponse.json(
     {
@@ -17,8 +21,8 @@ export async function GET() {
         paypalClient: readiness.paypalClient,
         paypalWebhook: readiness.paypalWebhook,
       },
+      checks: diagnostics,
     },
     { status: 200 }
   );
 }
-

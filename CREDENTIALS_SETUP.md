@@ -1,88 +1,101 @@
-# FESTIVALMINT AI — Credential & Environment Setup Guide
+# FESTIVALMINT AI — Complete External Setup Checklist
 
-Follow this guide to connect **Supabase**, **Gemini / OpenAI**, and **PayPal Sandbox** in `.env.local` (never commit `.env.local` to Git).
+Follow this step-by-step guide to add real **Supabase**, **Google Gemini**, and **PayPal Sandbox** credentials to `.env.local` (never commit `.env.local` to Git).
 
 ---
 
-## 1. Create `.env.local`
-Copy the safe template:
+## 1. Create or Open `.env.local`
+
+If `.env.local` does not exist yet:
 ```bash
 cp .env.example .env.local
 ```
+
+> **Server-Only Security Rule:** Never share or commit `SUPABASE_SERVICE_ROLE_KEY`, `GEMINI_API_KEY`, `OPENAI_API_KEY`, `PAYPAL_CLIENT_SECRET`, or `PAYPAL_WEBHOOK_ID`, and never prefix them with `NEXT_PUBLIC_`.
 
 ---
 
 ## 2. Supabase (Database, Auth & Private Evidence Storage)
 
-1. Sign in at [supabase.com/dashboard](https://supabase.com/dashboard) and create a new project (e.g., `festivalmint-ai`).
-2. Go to **Project Settings → API** and copy:
-   - **Project URL** → `NEXT_PUBLIC_SUPABASE_URL`
-   - **anon / public key** → `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-   - **service_role / secret key** → `SUPABASE_SERVICE_ROLE_KEY` *(keep strictly server-side; never prefix with `NEXT_PUBLIC_`)*
-3. Apply the SQL migrations cleanly in **SQL Editor**:
-   - **Fastest (One-Shot):** Open `supabase/combined_setup.sql`, paste its entire contents into **Supabase Dashboard → SQL Editor**, and click **Run** (executes migrations `0001`–`0004` + `seed.sql` in exact dependency order).
-   - **Or step-by-step in order:**
-     1. `supabase/migrations/0001_initial_schema.sql` (17 relational tables + triggers)
-     2. `supabase/migrations/0002_rls_policies.sql` (Row Level Security + anti-escalation triggers)
-     3. `supabase/migrations/0003_sponsor_proposals.sql` (Sponsor package selection RLS policy)
-     4. `supabase/migrations/0004_storage_bucket.sql` (Private `evidence` bucket + storage policies)
-     5. `supabase/seed.sql` (Fictional demo university, 2 societies, 3 events, 4 packages, 4 sponsors)
-4. Optional — create live Auth demo users (Organizer, Sponsor, Admin):
-   ```bash
-   node scripts/seed-demo.mjs
-   ```
-   - Organizer Demo: `organizer.demo@festivalmint.local`
-   - Sponsor Demo: `sponsor.demo@festivalmint.local`
-   - Admin Demo: `admin.demo@festivalmint.local`
-   - Password: value of `DEMO_SEED_PASSWORD` in `.env.local` (default `DemoMint!2026`).
+### Step A — Copy your 3 Supabase credentials
+1. Open [supabase.com/dashboard](https://supabase.com/dashboard) and select your project (or click **New project** and wait ~2 minutes for provisioning).
+2. In the left sidebar, click **Project Settings** (gear icon) → **API** (or **API Keys**):
+   - Copy **Project URL** (`https://<your-ref>.supabase.co`) → paste into:
+     - `NEXT_PUBLIC_SUPABASE_URL`
+   - Under **Publishable and secret API keys** (or **Legacy anon, service_role API keys**):
+     - Copy **Publishable key** (`sb_publishable_...`, or legacy `anon` public key) → paste into:
+       - `NEXT_PUBLIC_SUPABASE_ANON_KEY` *(safe for browser/public client via RLS)*
+     - Reveal and copy **Secret key** (`sb_secret_...`, or legacy `service_role` key) → paste into:
+       - `SUPABASE_SERVICE_ROLE_KEY` *(strictly server-only; never expose in browser code)*
+
+### Step B — Apply the database schema & private storage bucket (one shot)
+1. In Supabase Dashboard, open **SQL Editor** → **+ New query**.
+2. Open [`supabase/combined_setup.sql`](./supabase/combined_setup.sql) from this workspace, copy the entire file, paste it into the SQL Editor, and click **Run**.
+   - This safely and idempotently executes migrations `0001`–`0004` + `seed.sql` in exact dependency order (17 tables, RLS policies, anti-escalation triggers, private `evidence` bucket, and demo event/sponsor catalog).
+
+### Step C — Create Auth demo accounts (optional after SQL setup)
+Run once after `combined_setup.sql` finishes:
+```bash
+node scripts/seed-demo.mjs
+```
+- Organizer Demo: `organizer.demo@festivalmint.local`
+- Sponsor Demo: `sponsor.demo@festivalmint.local`
+- Admin Demo: `admin.demo@festivalmint.local`
+- Password: value of `DEMO_SEED_PASSWORD` in `.env.local` (default `DemoMint!2026`)
 
 ---
 
-## 3. AI Provider (Google Gemini — Recommended, or OpenAI)
+## 3. Google Gemini API (AI Package, Matching Explanations & Reports)
 
-FESTIVALMINT AI uses structured JSON output for sponsorship package generation, match explanations, outreach drafts, and performance reports—and automatically falls back to deterministic logic when no API key is configured.
-
-### Option A: Google Gemini (Default)
-1. Go to [aistudio.google.com/apikey](https://aistudio.google.com/apikey) and generate an API key.
-2. Add to `.env.local`:
+1. Sign in at [aistudio.google.com/apikey](https://aistudio.google.com/apikey).
+2. Click **Create API key**, select a Google Cloud project, and copy the key (starts with `AIza...`).
+3. Put these values into `.env.local`:
    ```env
    AI_PROVIDER=gemini
-   GEMINI_API_KEY=your-gemini-api-key
+   GEMINI_API_KEY=AIza...your-real-key...
    GEMINI_MODEL=gemini-2.5-flash
    ```
-
-### Option B: OpenAI
-```env
-AI_PROVIDER=openai
-OPENAI_API_KEY=your-openai-api-key
-OPENAI_MODEL=gpt-4o-mini
-```
+   *(Server-only secret — never expose in client components. While absent, FestivalMint AI uses clearly labeled deterministic fallbacks.)*
 
 ---
 
-## 4. PayPal Sandbox (`@paypal/paypal-server-sdk` Orders v2 & Webhooks)
+## 4. PayPal Developer Sandbox (`@paypal/paypal-server-sdk@2.5.0`)
 
 1. Sign in at [developer.paypal.com/dashboard](https://developer.paypal.com/dashboard).
-2. Navigate to **Apps & Credentials → Sandbox → Create App** (Merchant: Sandbox Business account).
-3. Copy **Client ID** and **Secret Key**:
+2. Click **Apps & Credentials** and make sure the top toggle says **Sandbox** (NOT **Live**).
+3. Click **Create App** (or open your existing **Sandbox** app using a Sandbox Business merchant account).
+4. Copy **both** the Client ID and Secret Key from that **exact same Sandbox app** into `.env.local`:
    ```env
    PAYPAL_ENV=sandbox
-   PAYPAL_CLIENT_ID=your-sandbox-client-id
-   NEXT_PUBLIC_PAYPAL_CLIENT_ID=your-sandbox-client-id
-   PAYPAL_CLIENT_SECRET=your-sandbox-client-secret
+   PAYPAL_CLIENT_ID=<same Sandbox Client ID>
+   NEXT_PUBLIC_PAYPAL_CLIENT_ID=<same Sandbox Client ID>
+   PAYPAL_CLIENT_SECRET=<matching Sandbox Secret Key (server-only)>
    ```
-4. **Sandbox Buyer Account (for test checkouts):**
-   - Go to **Sandbox → Accounts** and note the email & password of your **Personal** sandbox buyer account to sign in inside the PayPal checkout popup during testing/demo.
-5. **Webhook Verification (Recommended for reconciliation):**
-   - In your PayPal Sandbox App settings, scroll to **Sandbox Webhooks → Add Webhook**.
-   - Webhook URL: `https://<your-domain>/api/paypal/webhook` (for local testing use a tunnel such as `cloudflared` or `ngrok`).
+   > If `/v1/oauth2/token` returns `401 invalid_client`, double-check that the toggle was set to **Sandbox**, not **Live**, and regenerate/re-copy the matching Client ID and Secret from that single Sandbox REST app.
+5. **Get a Sandbox Buyer Account (for checkout popup testing):**
+   - In the left navigation, open **Testing Tools → Sandbox Accounts**.
+   - Find a **Personal** account row → click `...` → **View/Edit account** to note its Sandbox buyer email and password for signing in inside the PayPal checkout popup.
+6. **Optional — Webhook Verification (`PAYPAL_WEBHOOK_ID`):**
+   - In your Sandbox app settings, click **Add Webhook** pointing to `https://<your-public-or-tunnel-domain>/api/paypal/webhook` (for local testing use `cloudflared` or `ngrok`).
    - Subscribe to: `PAYMENT.CAPTURE.COMPLETED`, `CHECKOUT.ORDER.APPROVED`, `PAYMENT.CAPTURE.DENIED`, `PAYMENT.CAPTURE.REFUNDED`.
-   - Copy the generated **Webhook ID** into `.env.local`:
-     ```env
-     PAYPAL_WEBHOOK_ID=your-sandbox-webhook-id
-     ```
+   - Copy the Webhook ID into `PAYPAL_WEBHOOK_ID`.
 
 ---
 
-## 5. Verify Configuration Health
-Start the server (`npm run dev` or `npm start`) and visit `GET /api/health` to confirm every boolean readiness flag (`supabasePublic`, `supabaseAdmin`, `aiProvider`, `paypalServer`, `paypalClient`, `paypalWebhook`) without exposing secrets.
+## 5. Restart App & Verify Live Integration Readiness
+
+1. **Save `.env.local`** and restart Next.js so server and `NEXT_PUBLIC_*` variables reload:
+   ```bash
+   npm run dev
+   ```
+2. **Check structural + live readiness without printing secrets:**
+   ```bash
+   npm run readiness
+   npm run readiness -- --live
+   ```
+3. **Check HTTP readiness endpoint:**
+   Visit `http://localhost:3000/api/health` and confirm all boolean flags (`supabasePublic`, `supabaseAdmin`, `aiProvider`, `paypalServer`, `paypalClient`) are configured and `checks.*.structurallyValid` is `true`.
+4. **Run the automated contract suite:**
+   ```bash
+   npm run typecheck && npm run lint && npm test && npm run build
+   ```

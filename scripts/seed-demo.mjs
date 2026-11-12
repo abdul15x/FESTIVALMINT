@@ -17,19 +17,31 @@ function loadEnvLocal() {
     const idx = trimmed.indexOf('=');
     if (idx === -1) continue;
     const key = trimmed.slice(0, idx).trim();
-    const value = trimmed.slice(idx + 1).trim();
+    let value = trimmed.slice(idx + 1).trim();
+    if (
+      (value.startsWith('"') && value.endsWith('"')) ||
+      (value.startsWith("'") && value.endsWith("'"))
+    ) {
+      value = value.slice(1, -1).trim();
+    }
     if (!process.env[key]) process.env[key] = value;
   }
 }
 
 loadEnvLocal();
 
-const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
-const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
+const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() || '';
+const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim() || '';
 const demoPassword = process.env.DEMO_SEED_PASSWORD?.trim() || 'DemoMint!2026';
 
-if (!url || !serviceKey) {
-  console.error('Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY in .env.local.');
+const isPlaceholder = (val) =>
+  !val ||
+  /^your[-_]|your-project-ref\.supabase\.co|your-supabase-|placeholder/i.test(val);
+
+if (isPlaceholder(url) || isPlaceholder(serviceKey)) {
+  console.error(
+    'Real NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY (Publishable/Secret or legacy service_role) must be configured in .env.local before running seed-demo.mjs.'
+  );
   process.exit(1);
 }
 

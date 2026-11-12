@@ -1,7 +1,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { z } from 'zod';
-import { getAiConfig, getIntegrationReadiness, getPublicSupabaseEnv, isConfiguredValue } from '@/lib/env';
+import {
+  classifySupabasePublicKeyFormat,
+  classifySupabaseSecretKeyFormat,
+  getAiConfig,
+  getDetailedIntegrationDiagnostics,
+  getIntegrationReadiness,
+  getPublicSupabaseEnv,
+  isConfiguredValue,
+} from '@/lib/env';
 import { generateStructuredJson } from '@/lib/ai/client';
 
 test('isConfiguredValue and env helpers reject template placeholders and accept real values', () => {
@@ -25,6 +33,21 @@ test('isConfiguredValue and env helpers reject template placeholders and accept 
     const readiness = getIntegrationReadiness();
     assert.equal(readiness.supabasePublic, false);
     assert.equal(readiness.supabaseAdmin, false);
+
+    // Modern Supabase Publishable + Secret key format support
+    assert.equal(classifySupabasePublicKeyFormat('sb_publishable_TestKey1234567890'), 'publishable');
+    assert.equal(classifySupabaseSecretKeyFormat('sb_secret_TestSecretKey1234567890'), 'secret');
+
+    process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://abcdefg.supabase.co';
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'sb_publishable_TestKey1234567890';
+    process.env.SUPABASE_SERVICE_ROLE_KEY = 'sb_secret_TestSecretKey1234567890';
+
+    const diag = getDetailedIntegrationDiagnostics();
+    assert.equal(diag.supabasePublic.status, 'configured');
+    assert.equal(diag.supabasePublic.keyFormat, 'publishable');
+    assert.equal(diag.supabaseServer.status, 'configured');
+    assert.equal(diag.supabaseServer.keyFormat, 'secret');
+    assert.equal(diag.supabasePublic.externalAuth, 'not_verified');
   } finally {
     process.env.NEXT_PUBLIC_SUPABASE_URL = prevUrl;
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = prevAnon;

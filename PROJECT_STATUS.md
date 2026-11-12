@@ -1,6 +1,6 @@
 # FESTIVALMINT AI — Project Status Tracker
 
-> **Current Phase:** Sprint 5 Complete → Starting Sprint 6 (Fulfillment Evidence & AI Performance Reports)  
+> **Current Phase:** Sprint 6 Complete → Starting Sprint 7 (Quality, Security, Responsive QA & Stabilization)  
 > **Overall Status:** Active Autonomous Execution (Sprints 2–8)  
 
 ---
@@ -10,23 +10,24 @@
 - **Sprint 2 (`259a3f7`):** Supabase Auth, role-locked onboarding, RBAC session guards, real Organizer/Sponsor/Admin dashboards, profile settings, admin review & moderation APIs, `scripts/seed-demo.mjs`, and `tests/sprint2-auth.test.ts` (5/5 pass).
 - **Sprint 3 (`9894693`):** Event CRUD (`/api/events`, `/api/events/mine`, `/api/events/[id]`, `/api/events/[id]/submit`), `/organizer/events/new`, `/organizer/events/[id]`, AI sponsorship package generator (`POST /api/ai/packages`) with Gemini/OpenAI structured JSON + clearly labeled deterministic fallback, interactive `PackageStudio` editor + DB persistence (`PUT /api/events/[id]/packages`), and `tests/sprint3-events-packages.test.ts` (3/3 pass).
 - **Sprint 4 (`8efd366`):** Sponsor Discovery (`/sponsor/discover`, `GET /api/events/discover`), Event Details (`/sponsor/events/[id]`), Deterministic 6-Factor Matcher (`lib/matching/scorer.ts`) + AI Explanations (`lib/ai/matching.ts`, `POST /api/ai/matches`), AI Outreach Drafts (`POST /api/ai/outreach`), Organizer Matches (`/organizer/matches`), Proposal Lifecycle (`/organizer/proposals`, `/sponsor/proposals`, `POST /api/proposals`, `PATCH /api/proposals/[id]/respond`, migration `0003_sponsor_proposals.sql`), and `tests/sprint4-matching.test.ts` (3/3 pass).
-- **Sprint 5:** Installed APIMatic `paypal` Context Plugin (`npx context-plugins install paypal`) for dev-time SDK guidance, installed `@paypal/paypal-server-sdk@2.5.0` & `@paypal/react-paypal-js`, built `lib/paypal/client.ts` & `lib/paypal/guards.ts`, server-side order creation (`POST /api/paypal/orders` ignoring client amounts), server-side capture & amount/status integrity verification (`POST /api/paypal/capture` seeding `deliverables`), verified idempotent webhooks (`POST /api/paypal/webhook`), Sponsor PayPal Sandbox checkout UI (`/sponsor/payments/[id]`, `components/payments/paypal-checkout-client.tsx`) with honest missing-credential notice, and `tests/sprint5-paypal.test.ts` (4/4 pass; total 15/15).
+- **Sprint 5 (`e7bcbe1`):** APIMatic `paypal` Context Plugin + `@paypal/paypal-server-sdk@2.5.0` & `@paypal/react-paypal-js`, Orders v2 server-side create/capture (`/api/paypal/orders`, `/api/paypal/capture`), verified idempotent webhooks (`/api/paypal/webhook`), Sponsor Checkout UI (`/sponsor/payments/[id]`), and `tests/sprint5-paypal.test.ts` (4/4 pass).
+- **Sprint 6:** Private Supabase Storage `evidence` bucket migration (`supabase/migrations/0004_storage_bucket.sql`), MIME/extension/10MB validation (`lib/validation/evidence.ts`), file + external URL/notes upload & sponsor deliverable review API (`POST`/`PATCH /api/evidence`), evidence-grounded AI Sponsorship Performance Report engine (`lib/ai/reports.ts`, `POST /api/ai/reports`) explicitly separating Verified Facts, Organizer Claims, Analytical Observations, and Missing Deliverables, shared Organizer & Sponsor report pages (`/organizer/reports/[id]`, `/sponsor/reports/[id]`), sanitized `.env.example` placeholders, and `tests/sprint6-evidence.test.ts` (3/3 pass; total 18/18).
 
-## 2. Currently Being Developed (Sprint 6)
-- Deliverable fulfillment evidence uploads (private Supabase Storage `evidence` bucket + URL/note fallback + signed URLs via `POST /api/evidence`) and AI post-event sponsorship performance reports (`POST /api/ai/reports`, `/organizer/reports/[id]`, `/sponsor/reports/[id]`).
+## 2. Currently Being Developed (Sprint 7)
+- End-to-end UX refinements, `375px` mobile & security/RLS audit, live HTTP route smoke testing against production server, and updating `TESTING.md`.
 
 ## 3. Remaining Work
-- **Sprint 7:** Responsive UI/UX polish (`375px` & desktop), full security/RLS audit, automated & manual QA.
-- **Sprint 8:** Deployment readiness, demo seeding, complete `README.md`, `LICENSE`, `CREDENTIALS_SETUP.md`, and 3-minute demo guide.
+- **Sprint 8:** Deployment readiness, demo seeding verification, complete `README.md` (all 18 sections), `LICENSE`, `CREDENTIALS_SETUP.md`, and 3-minute demo guide.
 
 ## 4. Integration Status
 | Integration | Status | Notes |
 |---|---|---|
-| Next.js / TypeScript Foundation | Verified | `typecheck`, `lint`, `test` (15/15), and `next build` (37 routes) pass |
-| Database Schema & RLS SQL | Authored (Remote Apply Pending) | Migrations `0001`–`0003` & `scripts/seed-demo.mjs` ready; awaiting `.env.local` |
+| Next.js / TypeScript Foundation | Verified | `typecheck`, `lint`, `test` (18/18), and `next build` (39 routes) pass |
+| Database Schema & RLS SQL | Authored (Remote Apply Pending) | Migrations `0001`–`0004` & `scripts/seed-demo.mjs` ready; awaiting `.env.local` |
 | Authentication (Supabase Auth) | Implemented (Live Test Pending Keys) | Auth APIs, UI, `proxy.ts`, and RBAC guards verified via build/unit tests |
-| AI Provider (Gemini / OpenAI) | Implemented + Deterministic Fallback | Structured JSON package & explanation layers ready; falls back transparently when unconfigured |
-| PayPal Sandbox & APIMatic | Implemented (Live Capture Pending Keys) | APIMatic `paypal` context plugin installed; Orders v2 create/capture + webhook verify implemented; awaiting Sandbox keys |
+| AI Provider (Gemini / OpenAI) | Implemented + Deterministic Fallback | Structured JSON package, match explanation, outreach, & report layers ready |
+| PayPal Sandbox & APIMatic | Implemented (Live Capture Pending Keys) | APIMatic `paypal` context plugin installed; Orders v2 create/capture + webhook verify implemented |
+| File Storage (Supabase Storage) | Implemented (Bucket SQL + Signed URLs) | Private `evidence` bucket SQL (`0004`), MIME/10MB check, URL/notes fallback ready |
 | File Storage (Supabase Storage) | Scheduled (Sprint 6) | Private bucket & MIME guards planned |
 | Deployment (Vercel / Render) | Scheduled (Sprint 8) | Pending production env vars |
 

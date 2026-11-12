@@ -44,19 +44,20 @@ See [ARCHITECTURE.md](./ARCHITECTURE.md) for the complete system diagram, API co
 - **Database, Auth & Storage:** Supabase (PostgreSQL + RLS, `@supabase/ssr`, private `evidence` Storage bucket)
 - **Validation:** Zod v4
 - **AI Layer:** Google Gemini (`gemini-2.5-flash`) or OpenAI (`gpt-4o-mini`) via server-only structured JSON + prompt-injection delimiters (`<untrusted_data>`) + rate limiting
-- **Payments:** PayPal Server SDK (`@paypal/paypal-server-sdk@2.5.0`) + `@paypal/react-paypal-js` (Sandbox Orders v2 & webhook signature verification)
-- **Dev Tooling:** APIMatic PayPal Context Plugin (`context-plugins`)
+- **Payments:** PayPal Server SDK (`@paypal/paypal-server-sdk` `2.5.0` exact pin) + `@paypal/react-paypal-js` (Sandbox Orders v2 & webhook signature verification)
+- **Dev Tooling:** PayPal APIMatic Server SDK Context Plugin (`https://github.com/paypaldev/server-sdk-context-plugin-preview`)
 
 ---
 
 ## 6. APIMatic PayPal Context Plugin Usage
 
-During Sprint 5 development, the official **APIMatic PayPal Context Plugin** was installed locally as a development-time coding context assistant:
+During Sprint 5 development, the official preview **PayPal APIMatic Server SDK Context Plugin** was installed locally as a development-time coding context assistant:
 ```bash
-npx --yes context-plugins install paypal --yes --targets vscode,cursor
+npx --yes context-plugins install https://github.com/paypaldev/server-sdk-context-plugin-preview --force --yes --targets vscode,cursor
 ```
-- **Role:** Development-time SDK reference/context aid for `@paypal/paypal-server-sdk` (`Client`, `OrdersController`, `CheckoutPaymentIntent`, `OrderRequest`) signatures and error contracts.
-- **Boundary:** APIMatic's Context Plugin is strictly a developer tooling aid and is **never** described or imported as a runtime payment gateway. All runtime PayPal API calls execute through `@paypal/paypal-server-sdk`.
+- **Role:** Development-time SDK reference/context aid for `@paypal/paypal-server-sdk` (`2.5.0` exact pin) guidance across `typescript-getting-started`, `typescript-client-initialization`, `typescript-authentication`, `typescript-calling-endpoints`, `typescript-models`, `typescript-error-handling`, `typescript-configuration-resilience`, and `typescript-testing`.
+- **Patterns Applied:** Long-lived singleton `Client` reuse, explicit non-zero `timeout` (overriding `DEFAULT_CONFIGURATION.timeout = 0`), `oAuthClockSkew: 60`, split value/type imports (`isolatedModules`), `PayPal-Request-Id` idempotency, `AbortSignal` per-request cancellation, typed `CustomError`/`OAuthProviderError`/`ApiError` wire-error extraction (`debug_id`, `details`), and `unstable_httpClientOptions.adapter` stub unit tests.
+- **Boundary:** The Context Plugin is strictly a developer tooling aid (requires no APIMatic API key and provides no runtime credentials). All runtime PayPal API calls execute through `@paypal/paypal-server-sdk@2.5.0` (Orders v2) and PayPal's `/v1/notifications/verify-webhook-signature` endpoint (since `@paypal/paypal-server-sdk@2.5.0` does not ship a Webhooks controller).
 
 ---
 

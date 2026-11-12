@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { requireApiSession } from '@/lib/auth/session';
 import { apiError, apiSuccess } from '@/lib/api/response';
 import { createAdminSupabaseClient } from '@/lib/supabase/admin';
-import { createPayPalClient } from '@/lib/paypal/client';
+import { createPayPalClient, extractPayPalErrorInfo } from '@/lib/paypal/client';
 import {
   buildDeliverablesFromPackageSnapshot,
   verifyPayPalCaptureIntegrity,
@@ -118,11 +118,18 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  const abortController = new AbortController();
+  const timeoutHandle = setTimeout(() => abortController.abort(), 15_000);
+
   try {
-    const captureResponse = await paypal.ordersController.captureOrder({
-      id: parsed.data.orderId,
-      prefer: 'return=representation',
-    });
+    const captureResponse = await paypal.ordersController.captureOrder(
+      {
+        id: parsed.data.orderId,
+        paypalRequestId: `capture-${parsed.data.orderId}`,
+        prefer: 'return=representation',
+      },
+      { abortSignal: abortController.signal }
+    );
 
     const capturedOrder = captureResponse.result;
     const captureObj = capturedOrder.purchaseUnits?.[0]?.payments?.captures?.[0];
@@ -216,10 +223,13 @@ export async function POST(request: NextRequest) {
       'PayPal Sandbox payment captured and verified.'
     );
   } catch (err) {
-    return apiError(
-      'PAYPAL_CAPTURE_FAILED',
-      err instanceof Error ? err.message : 'Unable to capture PayPal Sandbox order.',
-      500
-    );
+    const mapped = extractPayPalErrorInfo(err);
+    const fullMessage = mapped.debugId
+      ? `${mapped.message} (PayPal debug ID: ${mapped.debugId})`
+      : mapped.message;
+    return apiError(mapped.code, fullMessage, mapped.httpStatus);
+  } finally {
+    clearTimeout(timeoutHandle);
   }
 }
+

@@ -1,9 +1,14 @@
 import { NextRequest } from 'next/server';
 import { z } from 'zod';
+import type { OrderRequest } from '@paypal/paypal-server-sdk';
 import { requireApiSession } from '@/lib/auth/session';
 import { apiError, apiSuccess } from '@/lib/api/response';
 import { createAdminSupabaseClient } from '@/lib/supabase/admin';
-import { CheckoutPaymentIntent, createPayPalClient } from '@/lib/paypal/client';
+import {
+  CheckoutPaymentIntent,
+  createPayPalClient,
+  extractPayPalErrorInfo,
+} from '@/lib/paypal/client';
 import { canSponsorInitiateCheckout, minorToPayPalDecimal } from '@/lib/paypal/guards';
 
 const createOrderBodySchema = z.object({
@@ -92,24 +97,33 @@ export async function POST(request: NextRequest) {
   const eventTitle = proposal.events?.title ?? 'University Event';
   const description = `FestivalMint AI — ${tierLabel} for ${eventTitle}`.slice(0, 120);
 
+  const abortController = new AbortController();
+  const timeoutHandle = setTimeout(() => abortController.abort(), 15_000);
+
   try {
-    const orderResponse = await paypal.ordersController.createOrder({
-      body: {
-        intent: CheckoutPaymentIntent.Capture,
-        purchaseUnits: [
-          {
-            referenceId: proposal.id,
-            customId: proposal.id,
-            description,
-            amount: {
-              currencyCode: proposal.currency.toUpperCase(),
-              value: valueDecimal,
-            },
+    const orderBody: OrderRequest = {
+      intent: CheckoutPaymentIntent.Capture,
+      purchaseUnits: [
+        {
+          referenceId: proposal.id,
+          customId: proposal.id,
+          description,
+          amount: {
+            currencyCode: proposal.currency.toUpperCase(),
+            value: valueDecimal,
           },
-        ],
+        },
+      ],
+    };
+
+    const orderResponse = await paypal.ordersController.createOrder(
+      {
+        body: orderBody,
+        paypalRequestId: crypto.randomUUID(),
+        prefer: 'return=representation',
       },
-      prefer: 'return=representation',
-    });
+      { abortSignal: abortController.signal }
+    );
 
     const order = orderResponse.result;
     if (!order?.id) {
@@ -155,10 +169,13 @@ export async function POST(request: NextRequest) {
       201
     );
   } catch (err) {
-    return apiError(
-      'PAYPAL_ORDER_FAILED',
-      err instanceof Error ? err.message : 'Unable to create PayPal Sandbox order.',
-      500
-    );
+    const mapped = extractPayPalErrorInfo(err);
+    const fullMessage = mapped.debugId
+      ? `${mapped.message} (PayPal debug ID: ${mapped.debugId})`
+      : mapped.message;
+    return apiError(mapped.code, fullMessage, mapped.httpStatus);
+  } finally {
+    clearTimeout(timeoutHandle);
   }
 }
+

@@ -32,8 +32,13 @@ export function getAiConfig() {
   const preferred = (process.env.AI_PROVIDER?.trim().toLowerCase() || 'gemini') as
     | 'gemini'
     | 'openai';
-  const geminiKey = process.env.GEMINI_API_KEY?.trim() || '';
-  const openaiKey = process.env.OPENAI_API_KEY?.trim() || '';
+  const genericKey = process.env.AI_API_KEY?.trim() || '';
+  const geminiKey =
+    process.env.GEMINI_API_KEY?.trim() ||
+    (preferred !== 'openai' || genericKey.startsWith('AIza') ? genericKey : '');
+  const openaiKey =
+    process.env.OPENAI_API_KEY?.trim() ||
+    (preferred === 'openai' || genericKey.startsWith('sk-') ? genericKey : '');
 
   if (preferred === 'openai' && openaiKey) {
     return {
@@ -93,3 +98,4 @@ export function getIntegrationReadiness(): IntegrationReadiness {
     appUrl: process.env.NEXT_PUBLIC_APP_URL?.trim() || 'http://localhost:3000',
   };
 }
+

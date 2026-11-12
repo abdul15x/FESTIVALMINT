@@ -1,14 +1,19 @@
 import { DashboardShell } from '@/components/layout/dashboard-shell';
-import { SprintShellCard } from '@/components/layout/sprint-shell-notice';
+import { requirePageSession } from '@/lib/auth/session';
+import { ProfileSettingsForm } from '@/components/profile/profile-settings-form';
 
-export default function ProfileSettingsPage() {
+export default async function ProfileSettingsPage() {
+  const { context } = await requirePageSession({ requireOnboarded: false });
+
   return (
-    <DashboardShell role="organizer" userName="Account Settings">
-      <SprintShellCard
-        title="Profile Settings"
-        description="Update your society or company profile metadata and preferences."
-        sprintTarget="Sprint 2"
-      />
+    <DashboardShell role={context.profile.role} userName={context.profile.full_name}>
+      <div className="mx-auto max-w-3xl">
+        <ProfileSettingsForm
+          profile={context.profile}
+          organizerProfile={context.organizerProfile}
+          sponsorProfile={context.sponsorProfile}
+        />
+      </div>
     </DashboardShell>
   );
 }

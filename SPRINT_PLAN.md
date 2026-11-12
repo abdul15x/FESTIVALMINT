@@ -169,3 +169,4 @@
   - Hosted app accessible publicly via HTTPS.
   - Complete 9-step journey works end-to-end live.
   - Public repo, `README.md`, `LICENSE`, `.env.example`, migrations, and demo guide ready for judges.
+

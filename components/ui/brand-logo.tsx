@@ -55,3 +55,4 @@ export function BrandLogo({ href = '/', compact = false, dark = false }: BrandLo
     </Link>
   );
 }
+

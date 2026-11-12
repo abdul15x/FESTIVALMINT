@@ -128,3 +128,4 @@ When required data is missing, the factor is penalized/marked partial, `missing_
 - **PayPal Flow:** Only accepted proposals (`status = 'accepted'` or retrying `'payment_pending'`) can initialize a PayPal order. Server reads `proposals.amount_minor` and `proposals.currency`, converts to decimal string (`(amount_minor / 100).toFixed(2)`), creates an Orders v2 order via `@paypal/paypal-server-sdk`, stores `CREATED`, captures on server after buyer approval, and verifies webhooks idempotently.
 - **Marketplace Scope:** Prototype captures funds directly to the configured Sandbox merchant account. No multi-vendor split payouts or escrow are claimed.
 - **APIMatic Role:** Used via `context-plugins` during Sprint 5 development to ground `@paypal/paypal-server-sdk` client initialization, Orders v2 create/capture calls, and error structures against current official SDK signatures.
+

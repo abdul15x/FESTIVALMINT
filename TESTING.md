@@ -37,3 +37,4 @@ npm run build          # Next.js production compilation check
 | 12 | AI Report Integrity | Generate report with 1 of 3 deliverables evidenced | Missing/unverified deliverables explicitly flagged; never marked complete | Sprint 6 |
 | 13 | Responsive QA | Test `/` and dashboards at `375px` and `1280px` | Zero horizontal overflow; primary buttons/forms usable | Sprint 7 |
 | 14 | Live Deployment | Fresh incognito session on hosted URL with seeded demo login | App loads, seeded workflow & checkout work end-to-end | Sprint 8 |
+

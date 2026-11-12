@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard,
   CalendarPlus,
@@ -16,6 +16,7 @@ import {
   Menu,
   X,
   LogOut,
+  ExternalLink,
 } from 'lucide-react';
 import { BrandLogo } from '@/components/ui/brand-logo';
 import { Badge } from '@/components/ui/badge';
@@ -58,15 +59,27 @@ interface DashboardShellProps {
 
 export function DashboardShell({
   role,
-  userName = 'Workspace Preview',
+  userName = 'Workspace User',
   children,
 }: DashboardShellProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
   const items = ROLE_NAV[role];
 
   const roleBadgeLabel =
     role === 'organizer' ? 'Organizer' : role === 'sponsor' ? 'Sponsor' : 'University Admin';
+
+  async function handleSignOut() {
+    setSigningOut(true);
+    try {
+      await fetch('/api/auth/sign-out', { method: 'POST' });
+    } finally {
+      router.push('/auth/sign-in');
+      router.refresh();
+    }
+  }
 
   const navContent = (
     <div className="flex h-full flex-col justify-between p-4">
@@ -98,7 +111,12 @@ export function DashboardShell({
                     : 'text-slate-600 hover:bg-slate-100 hover:text-slate-950'
                 )}
               >
-                <Icon className={cn('h-4 w-4 shrink-0', active ? 'text-emerald-400' : 'text-slate-500')} />
+                <Icon
+                  className={cn(
+                    'h-4 w-4 shrink-0',
+                    active ? 'text-emerald-400' : 'text-slate-500'
+                  )}
+                />
                 <span>{item.label}</span>
               </Link>
             );
@@ -106,26 +124,33 @@ export function DashboardShell({
         </nav>
       </div>
 
-      <div className="border-t border-slate-200 pt-4">
+      <div className="space-y-1 border-t border-slate-200 pt-4">
         <Link
           href="/"
-          className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-900"
+          className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900"
         >
-          <LogOut className="h-4 w-4" />
+          <ExternalLink className="h-4 w-4" />
           <span>Public Marketplace</span>
         </Link>
+        <button
+          type="button"
+          disabled={signingOut}
+          onClick={handleSignOut}
+          className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-xs font-medium text-red-600 hover:bg-red-50 disabled:opacity-50 cursor-pointer"
+        >
+          <LogOut className="h-4 w-4" />
+          <span>{signingOut ? 'Signing out...' : 'Sign Out'}</span>
+        </button>
       </div>
     </div>
   );
 
   return (
     <div className="min-h-screen bg-[#f8fafc] md:flex">
-      {/* Desktop Sidebar */}
       <aside className="hidden w-64 shrink-0 border-r border-slate-200 bg-white md:block">
         <div className="sticky top-0 h-screen overflow-y-auto">{navContent}</div>
       </aside>
 
-      {/* Mobile Top Header & Drawer */}
       <div className="flex flex-1 flex-col min-w-0">
         <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-slate-200 bg-white px-4 md:hidden">
           <BrandLogo compact />

@@ -37,3 +37,4 @@ export function formatShortDate(isoDate: string): string {
     return isoDate;
   }
 }
+

@@ -1,0 +1,113 @@
+# FESTIVALMINT AI — Project Memory & Engineering Source of Truth
+
+> **Last Updated:** 2026-11-12 12:35 PKT  
+> **Active Sprint:** Sprint 1 — Hours 0–6 (Foundation, Architecture & Database Schema)  
+> **Project Status:** Scaffolding & Sprint 1 Implementation  
+
+---
+
+## 1. Product Identity & Core Vision
+- **Product Name:** FESTIVALMINT AI
+- **Tagline:** *Great university events deserve the right sponsors.* (Also public umbrella: *Great events deserve the right sponsors.*)
+- **Mission:** Connect university societies, student organizers, and community events with relevant corporate sponsors using explainable AI—covering event brief structuring, AI sponsorship package generation, deterministic + AI-explained sponsor matching, in-app sponsorship proposals, real PayPal Sandbox checkout & verified webhooks, and post-event deliverable evidence & AI performance reporting.
+- **Core Differentiator:** A complete two-sided sponsorship lifecycle marketplace with transparent, deterministic factor scoring + AI explanation and verified post-event fulfillment—**not** a generic chatbot or static directory.
+
+### Canonical 9-Step Product Journey
+1. Organizer registers, chooses `organizer` role, and sets up society/university profile.
+2. Organizer creates a university event (audience, dates, reach, needs, benefits).
+3. AI structures and proposes Bronze/Silver/Gold (or custom) sponsorship packages with pricing rationale and explicit assumptions; organizer edits and saves.
+4. Sponsor registers, chooses `sponsor` role, and creates a company brand profile (industry, target audience, marketing objectives, budget min/max, preferred categories/locations).
+5. Sponsor discovers approved/published events (and organizer views recommended sponsors); deterministic scoring + AI generates transparent match scores (0–100) and plain-language compatibility explanations.
+6. Organizer sends a tailored sponsorship proposal (optionally drafted with AI outreach assistant); sponsor reviews and accepts/rejects/requests changes.
+7. Sponsor completes a real **PayPal Sandbox** checkout (`Orders v2` create -> browser approval -> server-side capture -> verified webhook reconciliation).
+8. Organizer records deliverable fulfillment and uploads supporting evidence (photos, links, attendance exports/counts) to private storage.
+9. AI analyzes submitted evidence vs. agreed deliverables and generates an evidence-grounded Sponsorship Performance Report separating verified facts, organizer claims, AI observations, and missing deliverables.
+
+*(Plus Role C: **University Admin** — seeded server-side, never via public sign-up — moderates/verifies organizers and events and maintains audit logs.)*
+
+---
+
+## 2. Non-Negotiable Engineering Rules & Guardrails
+1. **Stack Lock:** Next.js (App Router) + TypeScript + Tailwind CSS + shadcn-style UI + Supabase (PostgreSQL, Auth, Storage, RLS) + Gemini/OpenAI structured JSON + `@paypal/paypal-server-sdk` (Sandbox Orders v2 + webhook verification). **NO Spring Boot / Java.**
+2. **Payment Integrity:**
+   - Never trust payment amount, currency, role, or payment success from the browser.
+   - Always load accepted proposal amount/currency from PostgreSQL on the server before calling PayPal.
+   - Never mark a proposal/payment `paid`/`COMPLETED` based only on a frontend redirect.
+   - Standard PayPal Sandbox merchant checkout only in MVP—do **NOT** claim multi-party split payouts or escrow.
+   - Verify PayPal webhook signatures via PayPal's documented verification API and handle events idempotently via `webhook_events.paypal_event_id`.
+3. **APIMatic Mandate:**
+   - Use the **APIMatic PayPal Server SDK Context Plugin** (`npx context-plugins install paypal` / `https://github.com/paypaldev/server-sdk-context-plugin-preview`) during Sprint 5 PayPal SDK implementation.
+   - Document accurately as a **development-time tooling assistant**, never as a runtime dependency.
+4. **AI Integrity & Prompt-Injection Defense:**
+   - Use structured JSON validated by Zod schemas; reject malformed outputs and never accept SQL/HTML.
+   - Match scores are **computed deterministically in TypeScript**; LLM only produces plain-language explanations grounded in factor scores and stored fields.
+   - Treat event descriptions, sponsor bios, and uploaded files as untrusted data, never system instructions.
+   - Clearly label AI pricing suggestions and attendance estimates; never fabricate audience stats, visual proof, or completed deliverables without evidence.
+   - Never allow AI to approve, initiate, capture, or modify payments.
+5. **Security & Privacy:**
+   - Keep `SUPABASE_SERVICE_ROLE_KEY`, `GEMINI_API_KEY` / `OPENAI_API_KEY`, `PAYPAL_CLIENT_SECRET`, and `PAYPAL_WEBHOOK_ID` strictly server-side.
+   - Enforce BOTH Supabase Row Level Security (RLS) AND Next.js server-side role/ownership checks.
+   - Keep evidence files in a private Supabase Storage bucket with MIME/extension/size validation and short-lived signed URLs.
+   - Never commit `.env*` secret files or personal data. Label all demo accounts and seeded organizations clearly as fictional demo data.
+
+---
+
+## 3. Design System & Visual Identity Memory
+- **Theme Tone:** Precision University-Tech SaaS & B2B Marketplace (clean editorial clarity + financial-grade trust).
+- **Color Tokens:**
+  - Primary Ink / Brand Dark: `#0B1220` (deep obsidian navy), `#0F172A` (slate-900)
+  - Primary Accent (Festival Mint): `#10B981` (emerald-500) / `#059669` (emerald-600) with subtle surface tint `#ECFDF5`
+  - Canvas & Surfaces: `#F8FAFC` (crisp cool porcelain background), `#FFFFFF` (elevated cards), `#E2E8F0` (1px structural hairlines)
+  - Text Hierarchy: `#0F172A` (primary), `#475569` (secondary), `#64748B` (muted)
+  - Semantic States: Amber `#D97706` (pending/review), Crimson `#DC2626` (error/rejected), Blue `#2563EB` (info/verified)
+- **Typography:**
+  - Display & UI Sans: `Plus Jakarta Sans` (headings/brand) & `Inter` (body) via `next/font/google`
+  - Technical Monospace: `JetBrains Mono` for monetary amounts, match factor breakdowns, PayPal Order/Capture IDs, and status codes
+- **Layout Standards:**
+  - Public Marketing: Sticky minimal header, crisp hero with 2-sided value proposition + interactive workflow visual, clear dual CTAs (`For Organizers` / `For Sponsors`), featured verified demo events.
+  - Dashboards: Responsive left sidebar (`240px`) on desktop + compact mobile header & bottom/drawer navigation usable cleanly at `375px` width with zero horizontal overflow.
+  - Real States Only: Skeleton loaders, meaningful empty states, inline Zod validation errors, explicit confirmation dialogs, no fake charts or decorative filler.
+
+---
+
+## 4. Environment & Verified Tooling Snapshot
+- **Workspace:** `f:\paypal hackathon`
+- **Source Spec:** `FESTIVALMINT_AI_Execution_Plan_and_Agent_Handoff.docx` (preserved in root)
+- **Verified Local Runtimes (2026-11-12 12:31 PKT):**
+  - Node.js `v24.18.1`
+  - npm `11.16.0` / npx `11.16.0`
+  - pnpm installed
+  - Git `2.55.0.windows.3` (repository initialized in Sprint 1)
+  - PostgreSQL client `psql` 18 & Docker Desktop binary present
+  - `gh`, `supabase`, `vercel` not globally installed (can invoke via `npx` if needed)
+- **APIMatic Context Plugins CLI:** `context-plugins@0.12.0` verified (`paypal` plugin available in marketplace + preview repo `paypaldev/server-sdk-context-plugin-preview`).
+- **PayPal Server SDK:** `@paypal/paypal-server-sdk@2.5.0` verified on npm.
+- **External Credentials Status (Pending User Configuration in `.env.local`):**
+  - `NEXT_PUBLIC_SUPABASE_URL` — Not yet provided
+  - `NEXT_PUBLIC_SUPABASE_ANON_KEY` — Not yet provided
+  - `SUPABASE_SERVICE_ROLE_KEY` — Not yet provided
+  - `GEMINI_API_KEY` / `OPENAI_API_KEY` — Not yet provided
+  - `PAYPAL_CLIENT_ID` / `PAYPAL_CLIENT_SECRET` / `PAYPAL_WEBHOOK_ID` — Not yet provided
+
+---
+
+## 5. Timeline Strategy: 48-Hour Sprint Structure + Submission Reality Check
+- **Framework:** 8 sequential 6-hour Sprint Blocks (Sprint 1: Hours 0–6 through Sprint 8: Hours 42–48) with mandatory checkpoints and quality gates.
+- **Deadline Reality Check (from Execution Plan DOCX Section 13):**
+  - Brief notes hackathon deadline `2026-11-13 01:00 PKT` (~12.5 hours from `2026-11-12 12:31 PKT`).
+  - **Execution Rule:** Maintain full 8-Sprint discipline while compressing P0 vertical slices first so every sprint leaves a deployable, testable application. If time becomes tight, cut P2 items in strict order: (1) PWA, (2) Email notifications, (3) Admin analytics charts, (4) Automated CV logo detection, (5) PayPal Invoicing API. **NEVER cut** Auth/RBAC, Event/Sponsor flows, AI packages/matching, PayPal server-side create+capture, APIMatic usage, or README/demo readiness.
+
+---
+
+## 6. Architecture & Decision Log
+| Date | Decision | Rationale |
+|---|---|---|
+| 2026-11-12 | Scaffold Next.js App Router + TypeScript + Tailwind CSS (no `src/` directory) | Aligns with Execution Plan repo map (`app/`, `components/`, `lib/`, `types/`, `supabase/`, `tests/`). |
+| 2026-11-12 | Store all currency amounts as integer minor units (`price_minor`, `amount_minor`) + ISO `currency` | Eliminates floating-point rounding bugs in sponsorship quotes and PayPal Orders v2 reconciliation. |
+| 2026-11-12 | Deterministic TypeScript scoring engine + LLM plain-language explanation | Prevents hallucinated match percentages and ensures reproducible, inspectable 0–100 breakdowns. |
+| 2026-11-12 | Implement graceful startup when `.env.local` keys are absent + clear configuration banner | Keeps app runnable/buildable at every checkpoint even before Supabase/PayPal/AI keys are added. |
+
+---
+
+## 7. Sprint Checkpoint Log
+- **Sprint 1 (Hours 0–6):** **COMPLETE (Gate 1 Passed)** — Initialized Next.js 16.4.6 App Router + TypeScript + Tailwind CSS v4 foundation, design system, responsive `SiteHeader`/`DashboardShell`, landing page (`/`), `proxy.ts` session guard, Supabase SSR/Admin helpers, 17-table schema + RLS/anti-escalation triggers + fictional demo seed SQL, `.env.example`, and `/api/health`. Verified `tsc --noEmit`, `eslint`, `next build`, and production HTTP route smoke checks.

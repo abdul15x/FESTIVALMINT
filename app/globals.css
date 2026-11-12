@@ -1,0 +1,45 @@
+@import "tailwindcss";
+
+:root {
+  --surface-canvas: #f8fafc;
+  --surface-card: #ffffff;
+  --surface-muted: #f1f5f9;
+  --ink-primary: #0b1220;
+  --ink-secondary: #475569;
+  --ink-muted: #64748b;
+  --border-subtle: #e2e8f0;
+  --mint-50: #ecfdf5;
+  --mint-100: #d1fae5;
+  --mint-500: #10b981;
+  --mint-600: #059669;
+  --mint-700: #047857;
+}
+
+@theme inline {
+  --color-background: var(--surface-canvas);
+  --color-foreground: var(--ink-primary);
+  --color-mint-50: var(--mint-50);
+  --color-mint-100: var(--mint-100);
+  --color-mint-500: var(--mint-500);
+  --color-mint-600: var(--mint-600);
+  --color-mint-700: var(--mint-700);
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-jakarta), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, SFMono-Regular, monospace;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--surface-canvas);
+  color: var(--ink-primary);
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+}

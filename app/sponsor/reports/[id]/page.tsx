@@ -128,27 +128,35 @@ export default async function SponsorProposalReportPage({
             <ArrowLeft className="h-4 w-4" />
             Back to Proposals
           </Link>
-          <Badge variant={proposal.status === 'paid' ? 'mint' : 'amber'}>
+          <Badge dot variant={proposal.status === 'paid' ? 'mint' : 'amber'}>
             {proposal.status.toUpperCase()}
           </Badge>
         </div>
 
-        <Card>
+        <Card className="border-stone-200/90 bg-[#0c121e] text-white bg-ledger-grid-dark">
           <CardContent className="flex flex-wrap items-center justify-between gap-4 p-6">
             <div>
-              <h1 className="font-display text-2xl font-bold text-slate-950">
-                Sponsor Fulfillment Review &amp; Performance Report
+              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-emerald-400">
+                Sponsor Verification &amp; ROI Dossier
+              </p>
+              <h1 className="mt-1 font-display text-2xl font-bold">
+                Fulfillment Review &amp; Performance Report
               </h1>
-              <p className="mt-1 text-sm text-slate-600">
+              <p className="mt-1.5 text-sm text-slate-300">
                 {proposal.events?.title ?? 'Event'} by{' '}
                 {proposal.organizer_profiles?.society_name ?? 'Society'} (
                 {proposal.sponsorship_packages?.name ?? 'Package'} Tier)
                 {proposal.events?.starts_at ? ` · ${formatShortDate(proposal.events.starts_at)}` : ''}
               </p>
             </div>
-            <p className="font-display text-xl font-bold text-slate-950">
-              {formatMinorCurrency(proposal.amount_minor, proposal.currency)}
-            </p>
+            <div className="rounded-2xl border border-white/15 bg-white/5 px-4 py-3 text-right">
+              <p className="text-xs font-medium text-slate-400">
+                Settled Sponsorship
+              </p>
+              <p className="mt-0.5 font-mono text-2xl font-semibold text-emerald-400 tabular-nums">
+                {formatMinorCurrency(proposal.amount_minor, proposal.currency)}
+              </p>
+            </div>
           </CardContent>
         </Card>
 

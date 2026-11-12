@@ -3,11 +3,20 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Check, X, MessageSquare, CreditCard, FileBarChart2, Loader2 } from 'lucide-react';
+import {
+  Check,
+  X,
+  MessageSquare,
+  CreditCard,
+  FileBarChart2,
+  Loader2,
+  Handshake,
+} from 'lucide-react';
 import { Button, buttonClasses } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Alert } from '@/components/ui/alert';
+import { EmptyState } from '@/components/ui/empty-state';
 import { Textarea } from '@/components/ui/input';
 import { formatMinorCurrency, formatShortDate } from '@/lib/utils';
 
@@ -92,17 +101,16 @@ export function SponsorProposalsClient({
 
   if (proposals.length === 0) {
     return (
-      <Card>
-        <CardContent className="p-8 text-center">
-          <p className="text-sm font-medium text-slate-900">No sponsorship proposals yet</p>
-          <p className="mt-1 text-xs text-slate-500">
-            Browse approved campus events and select a package, or wait for organizer invitations.
-          </p>
-          <Link href="/sponsor/discover" className={`${buttonClasses('primary', 'sm')} mt-4`}>
+      <EmptyState
+        icon={<Handshake className="h-5 w-5" />}
+        title="No sponsorship proposals yet"
+        description="Browse verified campus events and lock a sponsorship package, or respond to invitations from student societies."
+        action={
+          <Link href="/sponsor/discover" className={buttonClasses('primary', 'sm')}>
             Discover Events
           </Link>
-        </CardContent>
-      </Card>
+        }
+      />
     );
   }
 
@@ -120,19 +128,19 @@ export function SponsorProposalsClient({
         const isPaid = ['paid', 'completed'].includes(p.status);
 
         return (
-          <Card key={p.id}>
+          <Card key={p.id} interactive>
             <CardContent className="space-y-4 p-5 sm:p-6">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
-                    <h2 className="font-display text-base font-bold text-slate-950">
+                    <h2 className="font-display text-lg font-bold text-[#0c121e]">
                       {p.events?.title ?? 'University Event'}
                     </h2>
-                    <Badge variant={STATUS_BADGE[p.status] ?? 'neutral'}>
+                    <Badge dot variant={STATUS_BADGE[p.status] ?? 'neutral'}>
                       {p.status.replace('_', ' ')}
                     </Badge>
                   </div>
-                  <p className="mt-1 text-xs text-slate-500">
+                  <p className="mt-1 text-xs text-stone-500">
                     {p.organizer_profiles?.society_name ?? 'Society'}
                     {p.organizer_profiles?.university_name
                       ? ` · ${p.organizer_profiles.university_name}`
@@ -142,30 +150,30 @@ export function SponsorProposalsClient({
                 </div>
 
                 <div className="text-right">
-                  <p className="text-xs font-medium text-slate-500">
+                  <p className="text-xs font-medium text-stone-500">
                     {p.sponsorship_packages?.name ?? 'Package'} Tier
                   </p>
-                  <p className="font-display text-lg font-bold text-slate-950">
+                  <p className="font-mono text-xl font-bold text-[#0c121e] tabular-nums">
                     {formatMinorCurrency(p.amount_minor, p.currency)}
                   </p>
                 </div>
               </div>
 
               {p.message && (
-                <div className="rounded-xl bg-slate-50 p-3.5 text-sm text-slate-700">
+                <div className="rounded-xl border border-stone-200/80 bg-[#faf9f6] p-3.5 text-sm leading-relaxed text-stone-700">
                   {p.message}
                 </div>
               )}
 
               {benefits.length > 0 && (
                 <div>
-                  <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-stone-500">
                     Locked Deliverables Snapshot
                   </p>
-                  <ul className="grid gap-1 text-xs text-slate-700 sm:grid-cols-2">
+                  <ul className="grid gap-1.5 text-xs text-stone-700 sm:grid-cols-2">
                     {benefits.slice(0, 6).map((b) => (
-                      <li key={b} className="flex items-start gap-1.5">
-                        <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-600" />
+                      <li key={b} className="flex items-start gap-2">
+                        <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-600" />
                         <span>{b}</span>
                       </li>
                     ))}
@@ -180,7 +188,7 @@ export function SponsorProposalsClient({
               )}
 
               {canRespond && (
-                <div className="space-y-3 border-t border-slate-100 pt-4">
+                <div className="space-y-3 border-t border-stone-100 pt-4">
                   <Textarea
                     rows={2}
                     placeholder="Optional note or requested adjustments before accepting..."
@@ -224,7 +232,7 @@ export function SponsorProposalsClient({
                 </div>
               )}
 
-              <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-3">
+              <div className="flex flex-wrap items-center justify-between gap-2 border-t border-stone-100 pt-3.5">
                 <Link href={`/sponsor/events/${p.event_id}`} className={buttonClasses('ghost', 'sm')}>
                   View Event Details
                 </Link>
@@ -244,7 +252,7 @@ export function SponsorProposalsClient({
                       className={buttonClasses('secondary', 'sm')}
                     >
                       <FileBarChart2 className="h-3.5 w-3.5" />
-                      Fulfillment & ROI Report
+                      Fulfillment &amp; ROI Report
                     </Link>
                   )}
                 </div>

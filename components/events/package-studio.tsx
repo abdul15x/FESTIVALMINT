@@ -2,11 +2,12 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Sparkles, Save, Send, Plus, Trash2, Loader2 } from 'lucide-react';
+import { Sparkles, Save, Send, Plus, Trash2, Loader2, Layers } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input, Label, Textarea } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Alert } from '@/components/ui/alert';
+import { EmptyState } from '@/components/ui/empty-state';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import type { SponsorshipPackageRow } from '@/types/database';
 import type { AiPackageGenerationResponse } from '@/lib/validation/packages';
@@ -216,184 +217,205 @@ export function PackageStudio({
     ]);
   }
 
+  const totalInventoryValue = packages.reduce((acc, p) => {
+    const price = Number(p.priceUsd) || 0;
+    const slots = Number(p.availability) || 1;
+    return acc + price * slots;
+  }, 0);
+
   return (
-    <div className="space-y-5">
-      <Card>
-        <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <CardTitle>AI Sponsorship Package Studio</CardTitle>
-            <CardDescription>
-              Generate suggested Bronze, Silver, and Gold tiers, review assumptions, edit pricing,
-              and save approved packages.
-            </CardDescription>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <Button variant="secondary" disabled={generating} onClick={handleGenerate}>
-              {generating ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Sparkles className="h-4 w-4" />
-              )}
-              {packages.length > 0 ? 'Regenerate Suggestions' : 'Generate AI Packages'}
-            </Button>
-            {['draft', 'rejected'].includes(eventStatus) && (
-              <Button variant="primary" disabled={submitting} onClick={handleSubmitForReview}>
-                <Send className="h-4 w-4" />
-                Submit Event for Review
-              </Button>
+    <Card>
+      <CardHeader className="flex flex-col gap-4 border-b border-stone-200/80 pb-5 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <div className="flex flex-wrap items-center gap-2">
+            <CardTitle className="text-xl">AI Sponsorship Package Studio</CardTitle>
+            {packages.length > 0 && (
+              <Badge variant="mint" className="font-mono">
+                Inventory ${totalInventoryValue.toLocaleString()}
+              </Badge>
             )}
           </div>
-        </CardHeader>
-
-        <CardContent className="space-y-4">
-          {error && <Alert tone="error">{error}</Alert>}
-          {feedback && <Alert tone="success">{feedback}</Alert>}
-
-          {generationMeta && (
-            <Alert
-              tone={generationMeta.source === 'ai_provider' ? 'info' : 'warning'}
-              title={
-                generationMeta.source === 'ai_provider'
-                  ? 'Created with FestivalMint AI'
-                  : 'Suggested Sponsorship Packages'
-              }
-            >
-              <p className="text-xs">
-                All suggested prices require organizer review and can be customized freely before
-                publishing.
-              </p>
-              {generationMeta.warnings.length > 0 && (
-                <ul className="mt-1.5 list-disc pl-4 text-xs">
-                  {generationMeta.warnings.map((w) => (
-                    <li key={w}>{w}</li>
-                  ))}
-                </ul>
-              )}
-            </Alert>
+          <CardDescription>
+            Generate calibrated Bronze, Silver, and Gold tiers, refine deliverables and pricing
+            rationale, and approve your live package lineup.
+          </CardDescription>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="secondary" disabled={generating} onClick={handleGenerate}>
+            {generating ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Sparkles className="h-4 w-4" />
+            )}
+            {packages.length > 0 ? 'Regenerate Suggestions' : 'Generate AI Packages'}
+          </Button>
+          {['draft', 'rejected'].includes(eventStatus) && (
+            <Button variant="primary" disabled={submitting} onClick={handleSubmitForReview}>
+              <Send className="h-4 w-4" />
+              Submit Event for Review
+            </Button>
           )}
+        </div>
+      </CardHeader>
 
-          {packages.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center">
-              <p className="text-sm font-medium text-slate-900">No sponsorship packages saved yet</p>
-              <p className="mt-1 text-xs text-slate-500">
-                Click &ldquo;Generate AI Packages&rdquo; above or add a custom tier manually.
-              </p>
-              <Button variant="outline" size="sm" className="mt-4" onClick={addCustomTier}>
+      <CardContent className="space-y-5 pt-6">
+        {error && <Alert tone="error">{error}</Alert>}
+        {feedback && <Alert tone="success">{feedback}</Alert>}
+
+        {generationMeta && (
+          <Alert
+            tone={generationMeta.source === 'ai_provider' ? 'info' : 'warning'}
+            title={
+              generationMeta.source === 'ai_provider'
+                ? 'Tailored Suggestions Ready'
+                : 'Suggested Sponsorship Structure'
+            }
+          >
+            <p className="text-xs">
+              Review each tier price, availability count, and deliverable before saving to your
+              event marketplace page.
+            </p>
+            {generationMeta.warnings.length > 0 && (
+              <ul className="mt-1.5 list-disc pl-4 text-xs">
+                {generationMeta.warnings.map((w) => (
+                  <li key={w}>{w}</li>
+                ))}
+              </ul>
+            )}
+          </Alert>
+        )}
+
+        {packages.length === 0 ? (
+          <EmptyState
+            icon={<Layers className="h-5 w-5" />}
+            title="No sponsorship packages saved yet"
+            description="Generate structured Bronze, Silver, and Gold tiers tailored to your attendance and audience, or build a custom tier from scratch."
+            action={
+              <Button variant="outline" size="sm" onClick={addCustomTier}>
                 <Plus className="h-3.5 w-3.5" />
                 Add Custom Package
               </Button>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {packages.map((pkg, idx) => (
-                <div
-                  key={pkg.id ?? idx}
-                  className="rounded-2xl border border-slate-200 bg-slate-50/70 p-5 space-y-3"
-                >
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <div className="flex items-center gap-2">
-                      <Badge variant={pkg.aiGenerated ? 'mint' : 'neutral'}>
-                        {pkg.aiGenerated ? 'Created with AI' : 'Custom Tier'}
-                      </Badge>
-                      <span className="font-mono text-xs text-slate-500">Tier #{idx + 1}</span>
-                    </div>
-                    {packages.length > 1 && (
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => setPackages((p) => p.filter((_, i) => i !== idx))}
-                      >
-                        <Trash2 className="h-3.5 w-3.5 text-red-600" />
-                        Remove
-                      </Button>
-                    )}
+            }
+          />
+        ) : (
+          <div className="space-y-5">
+            {packages.map((pkg, idx) => (
+              <div
+                key={pkg.id ?? idx}
+                className="rounded-2xl border border-stone-200/90 bg-[#faf9f6] p-5 space-y-4 transition-colors hover:border-stone-300"
+              >
+                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-stone-200/75 pb-3">
+                  <div className="flex items-center gap-2.5">
+                    <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#0c121e] font-mono text-xs font-bold text-emerald-400">
+                      0{idx + 1}
+                    </span>
+                    <Badge variant={pkg.aiGenerated ? 'mint' : 'neutral'}>
+                      {pkg.aiGenerated ? 'AI Suggested' : 'Custom Tier'}
+                    </Badge>
+                    <span className="font-mono text-sm font-bold text-[#0c121e]">
+                      ${Number(pkg.priceUsd || 0).toLocaleString()} {pkg.currency}
+                    </span>
                   </div>
+                  {packages.length > 1 && (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="text-rose-600 hover:bg-rose-50 hover:text-rose-700"
+                      onClick={() => setPackages((p) => p.filter((_, i) => i !== idx))}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                      Remove
+                    </Button>
+                  )}
+                </div>
 
-                  <div className="grid gap-3 sm:grid-cols-3">
-                    <div>
-                      <Label>Package Name</Label>
-                      <Input
-                        value={pkg.name}
-                        onChange={(e) => updatePkg(idx, { name: e.target.value })}
-                      />
-                    </div>
-                    <div>
-                      <Label>Suggested Price (USD)</Label>
-                      <Input
-                        type="number"
-                        min={10}
-                        value={pkg.priceUsd}
-                        onChange={(e) => updatePkg(idx, { priceUsd: e.target.value })}
-                      />
-                    </div>
-                    <div>
-                      <Label>Slots Available</Label>
-                      <Input
-                        type="number"
-                        min={1}
-                        value={pkg.availability}
-                        onChange={(e) => updatePkg(idx, { availability: e.target.value })}
-                      />
-                    </div>
-                  </div>
-
+                <div className="grid gap-3 sm:grid-cols-3">
                   <div>
-                    <Label>Package Summary</Label>
+                    <Label>Package Name</Label>
                     <Input
-                      value={pkg.description}
-                      onChange={(e) => updatePkg(idx, { description: e.target.value })}
+                      value={pkg.name}
+                      onChange={(e) => updatePkg(idx, { name: e.target.value })}
                     />
                   </div>
+                  <div>
+                    <Label>Price (USD)</Label>
+                    <Input
+                      type="number"
+                      min={10}
+                      className="font-mono"
+                      value={pkg.priceUsd}
+                      onChange={(e) => updatePkg(idx, { priceUsd: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <Label>Slots Available</Label>
+                    <Input
+                      type="number"
+                      min={1}
+                      className="font-mono"
+                      value={pkg.availability}
+                      onChange={(e) => updatePkg(idx, { availability: e.target.value })}
+                    />
+                  </div>
+                </div>
 
-                  <div className="grid gap-3 sm:grid-cols-2">
+                <div>
+                  <Label>Package Summary</Label>
+                  <Input
+                    value={pkg.description}
+                    onChange={(e) => updatePkg(idx, { description: e.target.value })}
+                  />
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <Label>Included Deliverables (one per line)</Label>
+                    <Textarea
+                      className="min-h-[118px]"
+                      value={pkg.benefitsText}
+                      onChange={(e) => updatePkg(idx, { benefitsText: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-3">
                     <div>
-                      <Label>Included Benefits &amp; Deliverables (one per line)</Label>
-                      <Textarea
-                        value={pkg.benefitsText}
-                        onChange={(e) => updatePkg(idx, { benefitsText: e.target.value })}
+                      <Label>Ideal Sponsor Categories (comma-separated)</Label>
+                      <Input
+                        value={pkg.idealSponsorCategoriesText}
+                        onChange={(e) =>
+                          updatePkg(idx, { idealSponsorCategoriesText: e.target.value })
+                        }
                       />
                     </div>
-                    <div className="space-y-3">
-                      <div>
-                        <Label>Ideal Sponsor Categories (comma-separated)</Label>
-                        <Input
-                          value={pkg.idealSponsorCategoriesText}
-                          onChange={(e) =>
-                            updatePkg(idx, { idealSponsorCategoriesText: e.target.value })
-                          }
-                        />
-                      </div>
-                      <div>
-                        <Label>Pricing Rationale</Label>
-                        <Textarea
-                          className="min-h-[64px]"
-                          value={pkg.pricingRationale}
-                          onChange={(e) => updatePkg(idx, { pricingRationale: e.target.value })}
-                        />
-                      </div>
+                    <div>
+                      <Label>Pricing Rationale</Label>
+                      <Textarea
+                        className="min-h-[60px]"
+                        value={pkg.pricingRationale}
+                        onChange={(e) => updatePkg(idx, { pricingRationale: e.target.value })}
+                      />
                     </div>
                   </div>
                 </div>
-              ))}
-
-              <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
-                <Button variant="outline" onClick={addCustomTier}>
-                  <Plus className="h-4 w-4" />
-                  Add Tier
-                </Button>
-                <Button variant="primary" disabled={saving} onClick={handleSavePackages}>
-                  {saving ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Save className="h-4 w-4" />
-                  )}
-                  Approve &amp; Save Packages
-                </Button>
               </div>
+            ))}
+
+            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-stone-200/80 pt-4">
+              <Button variant="outline" onClick={addCustomTier}>
+                <Plus className="h-4 w-4" />
+                Add Tier
+              </Button>
+              <Button variant="primary" size="lg" disabled={saving} onClick={handleSavePackages}>
+                {saving ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Save className="h-4 w-4" />
+                )}
+                Approve &amp; Save Packages
+              </Button>
             </div>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }

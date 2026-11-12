@@ -79,20 +79,22 @@ export default async function SponsorProposalPaymentPage({
             <ArrowLeft className="h-4 w-4" />
             Back to Proposals
           </Link>
-          <Badge variant="navy">Proposal {proposal.id.slice(0, 8)}</Badge>
+          <Badge variant="navy" className="font-mono">
+            Proposal {proposal.id.slice(0, 8)}
+          </Badge>
         </div>
 
-        <Card>
-          <CardContent className="space-y-4 p-6">
+        <Card className="overflow-hidden border-stone-200/90">
+          <div className="bg-[#0c121e] px-6 py-6 text-white bg-ledger-grid-dark sm:px-8">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-emerald-400">
                   {proposal.sponsorship_packages?.name ?? 'Sponsorship'} Tier Checkout
                 </p>
-                <h1 className="mt-1 font-display text-2xl font-bold text-slate-950">
+                <h1 className="mt-1 font-display text-2xl font-bold">
                   {proposal.events?.title ?? 'University Event'}
                 </h1>
-                <p className="mt-1 text-sm text-slate-600">
+                <p className="mt-1 text-sm text-slate-300">
                   {proposal.organizer_profiles?.society_name ?? 'Society'}
                   {proposal.organizer_profiles?.university_name
                     ? ` · ${proposal.organizer_profiles.university_name}`
@@ -102,22 +104,26 @@ export default async function SponsorProposalPaymentPage({
                     : ''}
                 </p>
               </div>
-              <div className="rounded-xl bg-slate-50 px-4 py-3 text-right">
-                <p className="text-xs text-slate-500">Locked Package Amount</p>
-                <p className="font-display text-2xl font-bold text-slate-950">
+              <div className="rounded-2xl border border-white/15 bg-white/5 px-4 py-3 text-right">
+                <p className="text-xs font-medium text-slate-400">
+                  Locked Package Amount
+                </p>
+                <p className="mt-0.5 font-mono text-2xl font-semibold text-emerald-400 tabular-nums">
                   {formatMinorCurrency(proposal.amount_minor, proposal.currency)}
                 </p>
               </div>
             </div>
+          </div>
 
+          <CardContent className="p-6 sm:px-8">
             {benefits.length > 0 && (
-              <div className="border-t border-slate-100 pt-4">
-                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+              <div>
+                <p className="mb-2.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-stone-500">
                   Agreed Deliverables Included
                 </p>
-                <ul className="grid gap-1.5 text-xs text-slate-700 sm:grid-cols-2">
+                <ul className="grid gap-2 text-xs text-stone-700 sm:grid-cols-2">
                   {benefits.map((b) => (
-                    <li key={b} className="flex items-start gap-1.5">
+                    <li key={b} className="flex items-start gap-2">
                       <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-600" />
                       <span>{b}</span>
                     </li>

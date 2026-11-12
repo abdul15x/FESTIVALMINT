@@ -1,10 +1,13 @@
 import Link from 'next/link';
-import { ShieldCheck, Users } from 'lucide-react';
+import { Activity, Building2, CalendarCheck2, Handshake, ShieldCheck, Users } from 'lucide-react';
 import { DashboardShell } from '@/components/layout/dashboard-shell';
 import { requirePageSession } from '@/lib/auth/session';
 import { createAdminSupabaseClient } from '@/lib/supabase/admin';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { PageHeader } from '@/components/ui/page-header';
+import { StatCard } from '@/components/ui/stat-card';
+import { EmptyState } from '@/components/ui/empty-state';
 import { buttonClasses } from '@/components/ui/button';
 
 export default async function AdminDashboardPage() {
@@ -36,71 +39,72 @@ export default async function AdminDashboardPage() {
   return (
     <DashboardShell role="admin" userName={context.profile.full_name}>
       <div className="space-y-6">
-        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-          <div>
-            <h1 className="font-display text-2xl font-bold text-slate-950">
-              University Admin Governance
-            </h1>
-            <p className="mt-1 text-sm text-slate-600">
-              Verify student societies, moderate event submissions, and monitor platform integrity.
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <Link href="/admin/reviews" className={buttonClasses('primary', 'md')}>
-              <ShieldCheck className="h-4 w-4" />
-              Review Queue
-            </Link>
-            <Link href="/admin/users" className={buttonClasses('outline', 'md')}>
-              <Users className="h-4 w-4" />
-              Users
-            </Link>
-          </div>
-        </div>
+        <PageHeader
+          eyebrow="Campus Governance"
+          title="University Admin Command"
+          description="Verify student societies, review campus event submissions, and oversee marketplace integrity."
+          actions={
+            <>
+              <Link href="/admin/reviews" className={buttonClasses('primary', 'md')}>
+                <ShieldCheck className="h-4 w-4" />
+                Review Queue
+              </Link>
+              <Link href="/admin/users" className={buttonClasses('outline', 'md')}>
+                <Users className="h-4 w-4" />
+                Users
+              </Link>
+            </>
+          }
+        />
 
         <div className="grid gap-4 sm:grid-cols-3">
-          <Card>
-            <CardContent className="p-5">
-              <p className="text-xs font-medium text-slate-500">Pending Societies</p>
-              <p className="mt-2 font-mono text-2xl font-bold text-amber-700">
-                {pendingOrganizers ?? 0}
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-5">
-              <p className="text-xs font-medium text-slate-500">Pending Event Reviews</p>
-              <p className="mt-2 font-mono text-2xl font-bold text-amber-700">
-                {pendingEvents ?? 0}
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-5">
-              <p className="text-xs font-medium text-slate-500">Total Platform Proposals</p>
-              <p className="mt-2 font-mono text-2xl font-bold text-slate-950">
-                {totalProposals ?? 0}
-              </p>
-            </CardContent>
-          </Card>
+          <StatCard
+            label="Pending Societies"
+            value={pendingOrganizers ?? 0}
+            detail="Awaiting campus verification"
+            tone={(pendingOrganizers ?? 0) > 0 ? 'amber' : 'default'}
+            icon={<Building2 className="h-4 w-4" />}
+          />
+          <StatCard
+            label="Pending Event Reviews"
+            value={pendingEvents ?? 0}
+            detail="Awaiting publish sign-off"
+            tone={(pendingEvents ?? 0) > 0 ? 'amber' : 'default'}
+            icon={<CalendarCheck2 className="h-4 w-4" />}
+          />
+          <StatCard
+            label="Total Marketplace Deals"
+            value={totalProposals ?? 0}
+            detail="Recorded sponsorship proposals"
+            tone="mint"
+            icon={<Handshake className="h-4 w-4" />}
+          />
         </div>
 
         <Card>
-          <CardHeader>
-            <CardTitle>Recent Audit Trail</CardTitle>
-            <CardDescription>Immutable log of administrative moderation actions.</CardDescription>
+          <CardHeader className="border-b border-stone-200/80 pb-4">
+            <CardTitle>Recent Governance Activity</CardTitle>
+            <CardDescription>Immutable ledger of administrative verification and moderation actions.</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-4">
             {!recentAudits || recentAudits.length === 0 ? (
-              <p className="text-sm text-slate-500">No audit events recorded yet.</p>
+              <EmptyState
+                icon={<Activity className="h-5 w-5" />}
+                title="No governance actions logged yet"
+                description="Administrative approvals, status updates, and moderation logs appear here automatically."
+              />
             ) : (
-              <div className="divide-y divide-slate-100">
+              <div className="divide-y divide-stone-100">
                 {recentAudits.map((log) => (
-                  <div key={log.id} className="flex items-center justify-between py-2.5 text-xs">
-                    <div className="flex items-center gap-2">
+                  <div
+                    key={log.id}
+                    className="flex flex-wrap items-center justify-between gap-2 py-3 text-xs"
+                  >
+                    <div className="flex items-center gap-2.5">
                       <Badge variant="navy">{log.action}</Badge>
-                      <span className="font-mono text-slate-600">{log.entity_type}</span>
+                      <span className="font-mono text-stone-600">{log.entity_type}</span>
                     </div>
-                    <span className="font-mono text-slate-400">
+                    <span className="font-mono text-stone-400 tabular-nums">
                       {new Date(log.created_at).toLocaleString()}
                     </span>
                   </div>

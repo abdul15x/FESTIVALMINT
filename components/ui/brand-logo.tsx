@@ -12,10 +12,10 @@ export function BrandLogo({ href = '/', compact = false, dark = false }: BrandLo
     <Link href={href} className="inline-flex items-center gap-2.5 group focus:outline-none">
       <span
         className={cn(
-          'flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border transition-transform group-hover:scale-[1.03]',
+          'relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border transition-all duration-200 group-hover:scale-[1.04]',
           dark
-            ? 'border-emerald-400/30 bg-emerald-500/15 text-emerald-400'
-            : 'border-emerald-600/20 bg-[#0b1220] text-emerald-400 shadow-sm'
+            ? 'border-emerald-400/35 bg-emerald-500/15 text-emerald-400 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]'
+            : 'border-emerald-700/20 bg-[#0c121e] text-emerald-400 shadow-sm'
         )}
         aria-hidden="true"
       >
@@ -36,23 +36,23 @@ export function BrandLogo({ href = '/', compact = false, dark = false }: BrandLo
         <span className="flex flex-col leading-none">
           <span
             className={cn(
-              'font-display text-base font-bold tracking-tight',
-              dark ? 'text-white' : 'text-[#0b1220]'
+              'font-display text-[15px] font-bold tracking-tight',
+              dark ? 'text-white' : 'text-[#0c121e]'
             )}
           >
-            FESTIVALMINT <span className="text-emerald-600">AI</span>
+            FESTIVALMINT{' '}
+            <span className={dark ? 'text-emerald-400' : 'text-emerald-600'}>AI</span>
           </span>
           <span
             className={cn(
-              'text-[10px] font-medium uppercase tracking-[0.14em]',
-              dark ? 'text-slate-400' : 'text-slate-500'
+              'mt-0.5 text-[11px] font-medium tracking-wide',
+              dark ? 'text-slate-400' : 'text-stone-500'
             )}
           >
-            Sponsorship Network
+            Campus Exchange
           </span>
         </span>
       )}
     </Link>
   );
 }
-

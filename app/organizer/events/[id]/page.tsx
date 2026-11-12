@@ -45,35 +45,34 @@ export default async function OrganizerEventDetailPage({
   return (
     <DashboardShell role="organizer" userName={org.society_name}>
       <div className="space-y-6">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
+        <div className="flex flex-col gap-4 border-b border-stone-200/80 pb-6 sm:flex-row sm:items-end sm:justify-between">
+          <div className="space-y-2.5">
             <Link href="/organizer/dashboard" className={buttonClasses('outline', 'sm')}>
               <ArrowLeft className="h-4 w-4" />
-              Dashboard
+              Command Center
             </Link>
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="font-display text-xl font-bold text-slate-950 sm:text-2xl">
-                  {event.title}
-                </h1>
-                <Badge
-                  variant={
-                    event.status === 'published' || event.status === 'approved'
-                      ? 'mint'
-                      : event.status === 'rejected'
-                        ? 'red'
-                        : 'amber'
-                  }
-                >
-                  {event.status}
-                </Badge>
-              </div>
+            <div className="flex flex-wrap items-center gap-2.5">
+              <h1 className="font-display text-2xl font-bold text-[#0c121e] sm:text-3xl">
+                {event.title}
+              </h1>
+              <Badge
+                dot
+                variant={
+                  event.status === 'published' || event.status === 'approved'
+                    ? 'mint'
+                    : event.status === 'rejected'
+                      ? 'red'
+                      : 'amber'
+                }
+              >
+                {event.status}
+              </Badge>
             </div>
           </div>
 
           <Link
             href={`/organizer/matches?eventId=${event.id}`}
-            className={buttonClasses('secondary', 'sm')}
+            className={buttonClasses('secondary', 'md')}
           >
             <Sparkles className="h-4 w-4" />
             Find Matched Sponsors

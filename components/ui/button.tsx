@@ -11,15 +11,15 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 
 const VARIANT_CLASSES: Record<ButtonVariant, string> = {
   primary:
-    'bg-[#0b1220] text-white hover:bg-slate-800 focus-visible:ring-[#0b1220] shadow-sm',
+    'bg-[#0c121e] text-white hover:bg-[#192338] active:scale-[0.99] focus-visible:ring-[#0c121e] shadow-[0_1px_2px_rgba(12,18,30,0.12),inset_0_1px_0_rgba(255,255,255,0.08)]',
   secondary:
-    'bg-emerald-600 text-white hover:bg-emerald-700 focus-visible:ring-emerald-600 shadow-sm',
+    'bg-emerald-600 text-white hover:bg-emerald-700 active:scale-[0.99] focus-visible:ring-emerald-600 shadow-[0_1px_2px_rgba(5,150,105,0.22),inset_0_1px_0_rgba(255,255,255,0.14)]',
   outline:
-    'border border-slate-300 bg-white text-slate-800 hover:bg-slate-50 focus-visible:ring-slate-400',
+    'border border-stone-300/90 bg-white text-[#0c121e] hover:border-stone-400 hover:bg-stone-50 active:scale-[0.99] focus-visible:ring-stone-400 shadow-[0_1px_1px_rgba(12,18,30,0.03)]',
   ghost:
-    'text-slate-700 hover:bg-slate-100 hover:text-slate-950 focus-visible:ring-slate-400',
+    'text-stone-700 hover:bg-stone-200/60 hover:text-[#0c121e] focus-visible:ring-stone-400',
   danger:
-    'bg-red-600 text-white hover:bg-red-700 focus-visible:ring-red-600 shadow-sm',
+    'bg-rose-600 text-white hover:bg-rose-700 active:scale-[0.99] focus-visible:ring-rose-600 shadow-sm',
 };
 
 const SIZE_CLASSES: Record<ButtonSize, string> = {
@@ -34,7 +34,7 @@ export function buttonClasses(
   className?: string
 ) {
   return cn(
-    'inline-flex items-center justify-center font-medium transition-colors cursor-pointer disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 whitespace-nowrap',
+    'inline-flex items-center justify-center font-medium transition-all duration-150 cursor-pointer disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#f7f6f2] whitespace-nowrap',
     VARIANT_CLASSES[variant],
     SIZE_CLASSES[size],
     className
@@ -54,4 +54,3 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   }
 );
 Button.displayName = 'Button';
-

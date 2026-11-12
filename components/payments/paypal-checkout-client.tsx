@@ -66,35 +66,38 @@ export function PayPalCheckoutClient({
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-3 sm:grid-cols-2">
-            <div className="rounded-xl border border-emerald-200 bg-white p-3.5">
-              <p className="text-xs text-slate-500">PayPal Order ID</p>
-              <p className="mt-0.5 font-mono text-xs font-semibold text-slate-900">
+            <div className="min-w-0 rounded-xl border border-emerald-200 bg-white p-3.5">
+              <p className="text-xs text-stone-500">PayPal Order ID</p>
+              <p className="mt-0.5 break-all font-mono text-xs font-medium text-[#0c121e]">
                 {payment?.paypal_order_id ?? 'Recorded server-side'}
               </p>
             </div>
-            <div className="rounded-xl border border-emerald-200 bg-white p-3.5">
-              <p className="text-xs text-slate-500">PayPal Capture ID</p>
-              <p className="mt-0.5 font-mono text-xs font-semibold text-slate-900">
+            <div className="min-w-0 rounded-xl border border-emerald-200 bg-white p-3.5">
+              <p className="text-xs text-stone-500">PayPal Capture ID</p>
+              <p className="mt-0.5 break-all font-mono text-xs font-medium text-[#0c121e]">
                 {payment?.paypal_capture_id ?? 'Verified'}
               </p>
             </div>
-            <div className="rounded-xl border border-emerald-200 bg-white p-3.5">
-              <p className="text-xs text-slate-500">Verified Amount</p>
-              <p className="mt-0.5 font-mono text-base font-bold text-slate-950">
+            <div className="min-w-0 rounded-xl border border-emerald-200 bg-white p-3.5">
+              <p className="text-xs text-stone-500">Verified Amount</p>
+              <p className="mt-0.5 font-mono text-base font-semibold text-[#0c121e]">
                 {formatMinorCurrency(payment?.amount_minor ?? amountMinor, payment?.currency ?? currency)}
               </p>
             </div>
-            <div className="rounded-xl border border-emerald-200 bg-white p-3.5">
-              <p className="text-xs text-slate-500">Captured Timestamp</p>
-              <p className="mt-0.5 text-sm font-medium text-slate-900">
+            <div className="min-w-0 rounded-xl border border-emerald-200 bg-white p-3.5">
+              <p className="text-xs text-stone-500">Captured Timestamp</p>
+              <p className="mt-0.5 text-sm font-medium text-[#0c121e]">
                 {payment?.captured_at ? formatShortDate(payment.captured_at) : 'Verified'}
               </p>
             </div>
           </div>
 
           <div className="flex flex-wrap gap-3">
-            <Link href={`/sponsor/reports/${proposalId}`} className={buttonClasses('primary', 'md')}>
-              <FileBarChart2 className="h-4 w-4" />
+            <Link
+              href={`/sponsor/reports/${proposalId}`}
+              className={buttonClasses('primary', 'md', 'whitespace-normal text-center sm:whitespace-nowrap')}
+            >
+              <FileBarChart2 className="h-4 w-4 shrink-0" />
               View Deliverables &amp; Performance Report
             </Link>
             <Link href="/sponsor/proposals" className={buttonClasses('outline', 'md')}>
@@ -108,19 +111,21 @@ export function PayPalCheckoutClient({
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="border-b border-stone-200/80 pb-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
-            <CardTitle>PayPal Sandbox Checkout</CardTitle>
+            <CardTitle className="text-xl">PayPal Sandbox Checkout</CardTitle>
             <CardDescription>
               Order totals are locked on our server from the accepted proposal record and verified
               on capture through PayPal Sandbox.
             </CardDescription>
           </div>
-          <Badge variant="blue">PayPal Sandbox</Badge>
+          <Badge dot variant="blue">
+            PayPal Sandbox
+          </Badge>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 pt-5">
         {error && <Alert tone="error">{error}</Alert>}
         {processingMessage && <Alert tone="info">{processingMessage}</Alert>}
 
@@ -136,22 +141,20 @@ export function PayPalCheckoutClient({
               Live PayPal Sandbox checkout buttons activate once credentials are configured.
             </p>
             <p className="mt-1 text-xs">
-              Add <code>NEXT_PUBLIC_PAYPAL_CLIENT_ID</code>, <code>PAYPAL_CLIENT_ID</code>, and{' '}
-              <code>PAYPAL_CLIENT_SECRET</code> in <code>.env.local</code> (see{' '}
-              <code>CREDENTIALS_SETUP.md</code>). FestivalMint AI never simulates fake payment
-              successes when keys are absent.
+              Sandbox credentials must be present in the deployment environment before initiating
+              checkout.
             </p>
           </Alert>
         ) : (
           <div className="space-y-4">
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-xs text-slate-700">
-              <p className="flex items-center gap-1.5 font-semibold text-slate-900">
+            <div className="rounded-2xl border border-stone-200/90 bg-[#faf9f6] p-4 text-xs text-stone-700">
+              <p className="flex items-center gap-1.5 font-semibold text-[#0c121e]">
                 <ShieldCheck className="h-4 w-4 text-emerald-600" />
                 Server-Verified Payment Summary
               </p>
-              <p className="mt-1">
+              <p className="mt-1 leading-relaxed">
                 Total charged in Sandbox:{' '}
-                <strong className="font-mono text-slate-950">
+                <strong className="font-mono text-[#0c121e] tabular-nums">
                   {formatMinorCurrency(amountMinor, currency)}
                 </strong>{' '}
                 (<code>{currency.toUpperCase()}</code>). Sign in with your PayPal Sandbox Personal

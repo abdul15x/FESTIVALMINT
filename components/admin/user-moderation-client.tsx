@@ -2,10 +2,11 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ShieldAlert, ShieldCheck } from 'lucide-react';
+import { ShieldAlert, ShieldCheck, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert } from '@/components/ui/alert';
+import { EmptyState } from '@/components/ui/empty-state';
 import { Card, CardContent } from '@/components/ui/card';
 import type { ProfileRow } from '@/types/database';
 
@@ -47,20 +48,24 @@ export function UserModerationClient({
     <div className="space-y-4">
       {error && <Alert tone="error">{error}</Alert>}
       {users.length === 0 ? (
-        <Card>
-          <CardContent className="p-6 text-sm text-slate-600">No user accounts found.</CardContent>
-        </Card>
+        <EmptyState
+          icon={<Users className="h-5 w-5" />}
+          title="No user accounts found"
+          description="Registered organizer, sponsor, and administrator accounts appear here."
+        />
       ) : (
         users.map((u) => (
           <Card key={u.id}>
             <CardContent className="flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="font-semibold text-slate-950">{u.full_name}</span>
+                  <span className="font-display font-bold text-[#0c121e]">{u.full_name}</span>
                   <Badge variant="navy">{u.role}</Badge>
-                  <Badge variant={u.status === 'active' ? 'mint' : 'red'}>{u.status}</Badge>
+                  <Badge dot variant={u.status === 'active' ? 'mint' : 'red'}>
+                    {u.status}
+                  </Badge>
                 </div>
-                <p className="mt-1 font-mono text-xs text-slate-500">{u.email}</p>
+                <p className="mt-1 font-mono text-xs text-stone-500">{u.email}</p>
               </div>
               {u.id !== currentAdminId && (
                 <Button

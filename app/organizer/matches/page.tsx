@@ -1,8 +1,10 @@
 import Link from 'next/link';
+import { CalendarPlus } from 'lucide-react';
 import { DashboardShell } from '@/components/layout/dashboard-shell';
 import { requirePageSession } from '@/lib/auth/session';
 import { OrganizerMatchesClient } from '@/components/matching/organizer-matches-client';
-import { Card, CardContent } from '@/components/ui/card';
+import { EmptyState } from '@/components/ui/empty-state';
+import { PageHeader } from '@/components/ui/page-header';
 import { buttonClasses } from '@/components/ui/button';
 import type { EventRow, SponsorshipPackageRow } from '@/types/database';
 
@@ -40,28 +42,23 @@ export default async function OrganizerMatchesPage({
   return (
     <DashboardShell role="organizer" userName={org.society_name}>
       <div className="space-y-6">
-        <div>
-          <h1 className="font-display text-2xl font-bold text-slate-950">
-            Ranked Sponsor Matches & AI Outreach
-          </h1>
-          <p className="mt-1 text-sm text-slate-600">
-            Score verified brand sponsors against your event, inspect transparent 6-factor scoring,
-            and send personalized sponsorship proposals.
-          </p>
-        </div>
+        <PageHeader
+          eyebrow="6-Factor Fit Engine"
+          title="Ranked Sponsor Matches & Outreach"
+          description="Score verified brand sponsors against your campus event, inspect transparent 6-factor scoring, and send tailored sponsorship proposals."
+        />
 
         {(events ?? []).length === 0 ? (
-          <Card>
-            <CardContent className="p-8 text-center">
-              <p className="text-sm font-medium text-slate-900">No events created yet</p>
-              <p className="mt-1 text-xs text-slate-500">
-                Create an event and generate sponsorship packages first to unlock sponsor matching.
-              </p>
-              <Link href="/organizer/events/new" className={`${buttonClasses('primary', 'sm')} mt-4`}>
+          <EmptyState
+            icon={<CalendarPlus className="h-5 w-5" />}
+            title="No events created yet"
+            description="Create an event and configure sponsorship packages first to unlock brand matching."
+            action={
+              <Link href="/organizer/events/new" className={buttonClasses('primary', 'sm')}>
                 Create First Event
               </Link>
-            </CardContent>
-          </Card>
+            }
+          />
         ) : (
           <OrganizerMatchesClient
             events={events ?? []}

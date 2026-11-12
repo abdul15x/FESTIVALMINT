@@ -130,222 +130,246 @@ export function EventForm({
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>{mode === 'create' ? 'Create University Event' : 'Edit Event Details'}</CardTitle>
+      <CardHeader className="border-b border-stone-200/80 pb-5">
+        <CardTitle className="text-xl">
+          {mode === 'create' ? 'Create University Event Brief' : 'Event Brief & Audience Details'}
+        </CardTitle>
         <CardDescription>
-          Accurate audience tags, dates, and benefits produce better AI sponsorship packages and
-          sponsor matches.
+          Accurate audience tags, campus dates, and benefit inventory produce sharper sponsorship
+          tiers and higher sponsor fit scores.
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <form onSubmit={onSubmit} className="space-y-4">
+      <CardContent className="pt-6">
+        <form onSubmit={onSubmit} className="space-y-6">
           {error && <Alert tone="error">{error}</Alert>}
           {success && <Alert tone="success">{success}</Alert>}
 
-          <div className="grid gap-4 sm:grid-cols-3">
-            <div className="sm:col-span-2">
-              <Label htmlFor="evTitle">Event Title</Label>
-              <Input
-                id="evTitle"
-                required
-                minLength={5}
-                maxLength={120}
-                placeholder="Spring Campus AI & FinTech Hackathon 2026"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-              />
+          <section className="space-y-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.1em] text-stone-500">
+              01 · Core Overview
+            </p>
+            <div className="grid gap-4 sm:grid-cols-3">
+              <div className="sm:col-span-2">
+                <Label htmlFor="evTitle">Event Title</Label>
+                <Input
+                  id="evTitle"
+                  required
+                  minLength={5}
+                  maxLength={120}
+                  placeholder="Spring Campus AI & FinTech Hackathon 2026"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                />
+              </div>
+              <div>
+                <Label htmlFor="evCategory">Category</Label>
+                <Select
+                  id="evCategory"
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                >
+                  {EVENT_CATEGORIES.map((c) => (
+                    <option key={c} value={c}>
+                      {c.charAt(0).toUpperCase() + c.slice(1)}
+                    </option>
+                  ))}
+                </Select>
+              </div>
             </div>
-            <div>
-              <Label htmlFor="evCategory">Category</Label>
-              <Select
-                id="evCategory"
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-              >
-                {EVENT_CATEGORIES.map((c) => (
-                  <option key={c} value={c}>
-                    {c.charAt(0).toUpperCase() + c.slice(1)}
-                  </option>
-                ))}
-              </Select>
-            </div>
-          </div>
 
-          <div>
-            <Label htmlFor="evDesc">Description &amp; Value Proposition (min 50 chars)</Label>
-            <Textarea
-              id="evDesc"
-              required
-              minLength={50}
-              maxLength={2000}
-              placeholder="Explain what happens at the event, who attends, and what makes it attractive to corporate partners..."
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-3">
             <div>
-              <Label htmlFor="evCity">City</Label>
-              <Input id="evCity" required value={city} onChange={(e) => setCity(e.target.value)} />
-            </div>
-            <div>
-              <Label htmlFor="evCountry">Country</Label>
-              <Input
-                id="evCountry"
+              <Label htmlFor="evDesc">Description &amp; Value Proposition (min 50 chars)</Label>
+              <Textarea
+                id="evDesc"
                 required
-                value={country}
-                onChange={(e) => setCountry(e.target.value)}
+                minLength={50}
+                maxLength={2000}
+                placeholder="Explain what happens at the event, who attends, and what makes it attractive to corporate partners..."
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
               />
             </div>
-            <div>
-              <Label htmlFor="evVenue">Campus Venue (Optional)</Label>
-              <Input
-                id="evVenue"
-                placeholder="Main Innovation Auditorium"
-                value={venue}
-                onChange={(e) => setVenue(e.target.value)}
-              />
-            </div>
-          </div>
+          </section>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <Label htmlFor="startsAt">Start Date &amp; Time</Label>
-              <Input
-                id="startsAt"
-                type="datetime-local"
-                required
-                value={startsAt}
-                onChange={(e) => setStartsAt(e.target.value)}
-              />
+          <section className="space-y-4 border-t border-stone-200/80 pt-5">
+            <p className="text-xs font-semibold uppercase tracking-[0.1em] text-stone-500">
+              02 · Campus Location &amp; Schedule
+            </p>
+            <div className="grid gap-4 sm:grid-cols-3">
+              <div>
+                <Label htmlFor="evCity">City</Label>
+                <Input id="evCity" required value={city} onChange={(e) => setCity(e.target.value)} />
+              </div>
+              <div>
+                <Label htmlFor="evCountry">Country</Label>
+                <Input
+                  id="evCountry"
+                  required
+                  value={country}
+                  onChange={(e) => setCountry(e.target.value)}
+                />
+              </div>
+              <div>
+                <Label htmlFor="evVenue">Campus Venue (Optional)</Label>
+                <Input
+                  id="evVenue"
+                  placeholder="Main Innovation Auditorium"
+                  value={venue}
+                  onChange={(e) => setVenue(e.target.value)}
+                />
+              </div>
             </div>
-            <div>
-              <Label htmlFor="endsAt">End Date &amp; Time</Label>
-              <Input
-                id="endsAt"
-                type="datetime-local"
-                required
-                value={endsAt}
-                onChange={(e) => setEndsAt(e.target.value)}
-              />
-            </div>
-          </div>
 
-          <div className="grid gap-4 sm:grid-cols-3">
-            <div>
-              <Label htmlFor="attendees">Expected Attendees (Est.)</Label>
-              <Input
-                id="attendees"
-                type="number"
-                min={10}
-                required
-                value={expectedAttendees}
-                onChange={(e) => setExpectedAttendees(e.target.value)}
-              />
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <Label htmlFor="startsAt">Start Date &amp; Time</Label>
+                <Input
+                  id="startsAt"
+                  type="datetime-local"
+                  required
+                  value={startsAt}
+                  onChange={(e) => setStartsAt(e.target.value)}
+                />
+              </div>
+              <div>
+                <Label htmlFor="endsAt">End Date &amp; Time</Label>
+                <Input
+                  id="endsAt"
+                  type="datetime-local"
+                  required
+                  value={endsAt}
+                  onChange={(e) => setEndsAt(e.target.value)}
+                />
+              </div>
             </div>
-            <div>
-              <Label htmlFor="socialReach">Social Media Reach (Est.)</Label>
-              <Input
-                id="socialReach"
-                type="number"
-                min={0}
-                value={socialReach}
-                onChange={(e) => setSocialReach(e.target.value)}
-              />
-            </div>
-            <div>
-              <Label htmlFor="targetUsd">Sponsorship Target (USD)</Label>
-              <Input
-                id="targetUsd"
-                type="number"
-                min={100}
-                required
-                value={sponsorshipTargetUsd}
-                onChange={(e) => setSponsorshipTargetUsd(e.target.value)}
-              />
-            </div>
-          </div>
+          </section>
 
-          <div className="grid gap-4 sm:grid-cols-2">
+          <section className="space-y-4 border-t border-stone-200/80 pt-5">
+            <p className="text-xs font-semibold uppercase tracking-[0.1em] text-stone-500">
+              03 · Audience Reach &amp; Target Goal
+            </p>
+            <div className="grid gap-4 sm:grid-cols-3">
+              <div>
+                <Label htmlFor="attendees">Expected Attendees (Est.)</Label>
+                <Input
+                  id="attendees"
+                  type="number"
+                  min={10}
+                  required
+                  value={expectedAttendees}
+                  onChange={(e) => setExpectedAttendees(e.target.value)}
+                />
+              </div>
+              <div>
+                <Label htmlFor="socialReach">Social Media Reach (Est.)</Label>
+                <Input
+                  id="socialReach"
+                  type="number"
+                  min={0}
+                  value={socialReach}
+                  onChange={(e) => setSocialReach(e.target.value)}
+                />
+              </div>
+              <div>
+                <Label htmlFor="targetUsd">Sponsorship Target (USD)</Label>
+                <Input
+                  id="targetUsd"
+                  type="number"
+                  min={100}
+                  required
+                  value={sponsorshipTargetUsd}
+                  onChange={(e) => setSponsorshipTargetUsd(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <Label htmlFor="audTags">Target Audience Tags (comma-separated)</Label>
+                <Input
+                  id="audTags"
+                  required
+                  value={audienceTags}
+                  onChange={(e) => setAudienceTags(e.target.value)}
+                />
+              </div>
+              <div>
+                <Label htmlFor="evObj">Event Objectives (comma-separated)</Label>
+                <Input
+                  id="evObj"
+                  required
+                  value={eventObjectives}
+                  onChange={(e) => setEventObjectives(e.target.value)}
+                />
+              </div>
+            </div>
+          </section>
+
+          <section className="space-y-4 border-t border-stone-200/80 pt-5">
+            <p className="text-xs font-semibold uppercase tracking-[0.1em] text-stone-500">
+              04 · Sponsorship Needs &amp; Deliverable Inventory
+            </p>
             <div>
-              <Label htmlFor="audTags">Target Audience Tags (comma-separated)</Label>
-              <Input
-                id="audTags"
-                required
-                value={audienceTags}
-                onChange={(e) => setAudienceTags(e.target.value)}
-              />
+              <Label>Sponsorship Needs</Label>
+              <div className="flex flex-wrap gap-2">
+                {SPONSORSHIP_NEEDS_OPTIONS.map((need) => {
+                  const active = sponsorshipNeeds.includes(need);
+                  return (
+                    <button
+                      key={need}
+                      type="button"
+                      onClick={() => toggle(sponsorshipNeeds, setSponsorshipNeeds, need)}
+                      className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer ${
+                        active
+                          ? 'border-emerald-600 bg-emerald-50 text-emerald-900'
+                          : 'border-stone-200 bg-white text-stone-600 hover:bg-stone-50'
+                      }`}
+                    >
+                      {need}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
+
             <div>
-              <Label htmlFor="evObj">Event Objectives (comma-separated)</Label>
-              <Input
-                id="evObj"
-                required
-                value={eventObjectives}
-                onChange={(e) => setEventObjectives(e.target.value)}
-              />
+              <Label>Available Sponsor Benefits Inventory</Label>
+              <div className="flex flex-wrap gap-2">
+                {EVENT_BENEFITS_OPTIONS.map((benefit) => {
+                  const active = availableBenefits.includes(benefit);
+                  return (
+                    <button
+                      key={benefit}
+                      type="button"
+                      onClick={() => toggle(availableBenefits, setAvailableBenefits, benefit)}
+                      className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer ${
+                        active
+                          ? 'border-[#0c121e] bg-[#0c121e] text-white'
+                          : 'border-stone-200 bg-white text-stone-600 hover:bg-stone-50'
+                      }`}
+                    >
+                      {benefit}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-          </div>
+          </section>
 
-          <div>
-            <Label>Sponsorship Needs</Label>
-            <div className="flex flex-wrap gap-2">
-              {SPONSORSHIP_NEEDS_OPTIONS.map((need) => {
-                const active = sponsorshipNeeds.includes(need);
-                return (
-                  <button
-                    key={need}
-                    type="button"
-                    onClick={() => toggle(sponsorshipNeeds, setSponsorshipNeeds, need)}
-                    className={`rounded-full border px-3 py-1 text-xs font-medium cursor-pointer ${
-                      active
-                        ? 'border-emerald-600 bg-emerald-50 text-emerald-800'
-                        : 'border-slate-200 bg-white text-slate-600'
-                    }`}
-                  >
-                    {need}
-                  </button>
-                );
-              })}
-            </div>
+          <div className="border-t border-stone-200/80 pt-5">
+            <Button type="submit" size="lg" disabled={saving}>
+              {saving ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Saving Event...
+                </>
+              ) : mode === 'create' ? (
+                'Create Event & Configure Packages'
+              ) : (
+                'Save Event Changes'
+              )}
+            </Button>
           </div>
-
-          <div>
-            <Label>Available Sponsor Benefits Inventory</Label>
-            <div className="flex flex-wrap gap-2">
-              {EVENT_BENEFITS_OPTIONS.map((benefit) => {
-                const active = availableBenefits.includes(benefit);
-                return (
-                  <button
-                    key={benefit}
-                    type="button"
-                    onClick={() => toggle(availableBenefits, setAvailableBenefits, benefit)}
-                    className={`rounded-full border px-3 py-1 text-xs font-medium cursor-pointer ${
-                      active
-                        ? 'border-[#0b1220] bg-[#0b1220] text-white'
-                        : 'border-slate-200 bg-white text-slate-600'
-                    }`}
-                  >
-                    {benefit}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          <Button type="submit" disabled={saving}>
-            {saving ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Saving Event...
-              </>
-            ) : mode === 'create' ? (
-              'Create Event & Configure Packages'
-            ) : (
-              'Save Event Changes'
-            )}
-          </Button>
         </form>
       </CardContent>
     </Card>

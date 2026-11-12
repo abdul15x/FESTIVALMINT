@@ -8,7 +8,7 @@ export const Input = React.forwardRef<
   <input
     ref={ref}
     className={cn(
-      'flex h-10 w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-sm text-slate-900 placeholder:text-slate-400 transition-colors focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-600/20 disabled:cursor-not-allowed disabled:bg-slate-50',
+      'flex h-10 w-full rounded-xl border border-stone-300 bg-white px-3.5 py-2 text-sm text-[#0c121e] placeholder:text-stone-400 transition-all focus:border-emerald-600 focus:outline-none focus:ring-3 focus:ring-emerald-600/15 disabled:cursor-not-allowed disabled:bg-stone-100/70',
       className
     )}
     {...props}
@@ -23,7 +23,7 @@ export const Textarea = React.forwardRef<
   <textarea
     ref={ref}
     className={cn(
-      'flex min-h-[96px] w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 transition-colors focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-600/20 disabled:cursor-not-allowed disabled:bg-slate-50',
+      'flex min-h-[96px] w-full rounded-xl border border-stone-300 bg-white px-3.5 py-2.5 text-sm text-[#0c121e] placeholder:text-stone-400 transition-all focus:border-emerald-600 focus:outline-none focus:ring-3 focus:ring-emerald-600/15 disabled:cursor-not-allowed disabled:bg-stone-100/70',
       className
     )}
     {...props}
@@ -38,7 +38,7 @@ export const Select = React.forwardRef<
   <select
     ref={ref}
     className={cn(
-      'flex h-10 w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-sm text-slate-900 transition-colors focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-600/20 disabled:cursor-not-allowed disabled:bg-slate-50',
+      'flex h-10 w-full rounded-xl border border-stone-300 bg-white px-3.5 py-2 text-sm text-[#0c121e] transition-all focus:border-emerald-600 focus:outline-none focus:ring-3 focus:ring-emerald-600/15 disabled:cursor-not-allowed disabled:bg-stone-100/70',
       className
     )}
     {...props}
@@ -52,9 +52,11 @@ export function Label({
 }: React.LabelHTMLAttributes<HTMLLabelElement>) {
   return (
     <label
-      className={cn('block text-xs font-semibold uppercase tracking-wide text-slate-700 mb-1.5', className)}
+      className={cn(
+        'block text-xs font-medium text-stone-700 mb-1.5',
+        className
+      )}
       {...props}
     />
   );
 }
-

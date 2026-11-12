@@ -75,56 +75,66 @@ export default async function SponsorEventDetailPage({
             Back to Discovery
           </Link>
           <Badge
+            dot
             variant={
               event.organizer_profiles?.verification_status === 'verified' ? 'mint' : 'neutral'
             }
           >
-            <ShieldCheck className="mr-1 h-3 w-3" />
+            <ShieldCheck className="h-3 w-3" />
             {event.organizer_profiles?.verification_status === 'verified'
               ? 'Verified Society'
               : 'Society Pending Verification'}
           </Badge>
         </div>
 
-        <Card>
-          <CardContent className="space-y-4 p-6">
+        <Card className="overflow-hidden border-stone-200/90">
+          <div className="bg-[#0c121e] px-6 py-6 text-white bg-ledger-grid-dark sm:px-8">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
                 <div className="flex flex-wrap items-center gap-2">
-                  <Badge variant="blue">{event.category}</Badge>
-                  <Badge variant="neutral">{event.status}</Badge>
+                  <Badge
+                    variant="navy"
+                    className="border-emerald-400/30 bg-emerald-500/15 text-emerald-300"
+                  >
+                    {event.category}
+                  </Badge>
+                  <Badge variant="navy" className="border-white/20 bg-white/10 text-slate-200">
+                    {event.status}
+                  </Badge>
                 </div>
-                <h1 className="mt-2 font-display text-2xl font-bold text-slate-950">
-                  {event.title}
-                </h1>
-                <p className="mt-1 text-sm text-slate-600">
+                <h1 className="mt-3 font-display text-2xl font-bold sm:text-3xl">{event.title}</h1>
+                <p className="mt-1.5 text-sm text-slate-300">
                   Hosted by {event.organizer_profiles?.society_name ?? 'University Society'}
                   {event.organizer_profiles?.university_name
                     ? ` · ${event.organizer_profiles.university_name}`
                     : ''}
                 </p>
               </div>
-              <div className="rounded-xl bg-slate-50 px-4 py-2.5 text-right">
-                <p className="text-xs text-slate-500">Target Sponsorship Pool</p>
-                <p className="font-display text-lg font-bold text-slate-950">
+              <div className="rounded-2xl border border-white/15 bg-white/5 px-4 py-3 text-right">
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                  Target Sponsorship Pool
+                </p>
+                <p className="mt-0.5 font-mono text-2xl font-bold text-emerald-400 tabular-nums">
                   {formatMinorCurrency(event.sponsorship_target_minor, event.currency)}
                 </p>
               </div>
             </div>
+          </div>
 
-            <p className="text-sm leading-relaxed text-slate-700">{event.description}</p>
+          <CardContent className="space-y-4 p-6 sm:px-8">
+            <p className="text-sm leading-relaxed text-stone-700">{event.description}</p>
 
-            <div className="flex flex-wrap gap-5 border-t border-slate-100 pt-4 text-xs text-slate-600">
+            <div className="flex flex-wrap gap-5 border-t border-stone-100 pt-4 text-xs text-stone-600">
               <span className="inline-flex items-center gap-1.5">
-                <Calendar className="h-4 w-4 text-slate-400" />
+                <Calendar className="h-4 w-4 text-emerald-600" />
                 {formatShortDate(event.starts_at)} – {formatShortDate(event.ends_at)}
               </span>
               <span className="inline-flex items-center gap-1.5">
-                <MapPin className="h-4 w-4 text-slate-400" />
+                <MapPin className="h-4 w-4 text-emerald-600" />
                 {event.venue ? `${event.venue}, ${event.city}` : event.city}
               </span>
               <span className="inline-flex items-center gap-1.5">
-                <Users className="h-4 w-4 text-slate-400" />
+                <Users className="h-4 w-4 text-emerald-600" />
                 {event.expected_attendees.toLocaleString()} expected attendees
               </span>
             </div>
@@ -134,7 +144,7 @@ export default async function SponsorEventDetailPage({
                 {event.audience_tags.map((tag) => (
                   <span
                     key={tag}
-                    className="rounded-md bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700"
+                    className="rounded-lg border border-stone-200 bg-[#faf9f6] px-2.5 py-1 text-xs font-medium text-stone-700"
                   >
                     #{tag}
                   </span>

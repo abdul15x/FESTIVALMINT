@@ -1,5 +1,6 @@
 import { DashboardShell } from '@/components/layout/dashboard-shell';
 import { requirePageSession } from '@/lib/auth/session';
+import { PageHeader } from '@/components/ui/page-header';
 import {
   SponsorProposalsClient,
   type SponsorProposalItem,
@@ -23,15 +24,11 @@ export default async function SponsorProposalsPage() {
   return (
     <DashboardShell role="sponsor" userName={sponsor?.company_name ?? context.profile.full_name}>
       <div className="space-y-6">
-        <div>
-          <h1 className="font-display text-2xl font-bold text-slate-950">
-            Sponsorship Proposals & Deals
-          </h1>
-          <p className="mt-1 text-sm text-slate-600">
-            Review organizer invitations, accept or request changes, pay accepted tiers via PayPal
-            Sandbox, and inspect post-event fulfillment reports.
-          </p>
-        </div>
+        <PageHeader
+          eyebrow="Deal Pipeline"
+          title="Sponsorship Proposals & Checkout"
+          description="Review organizer invitations, accept or request adjustments, complete accepted tiers in PayPal Sandbox, and inspect verified fulfillment dossiers."
+        />
 
         <SponsorProposalsClient initialProposals={proposals ?? []} />
       </div>

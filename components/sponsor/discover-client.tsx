@@ -2,12 +2,23 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { Search, Sparkles, MapPin, Users, Calendar, ArrowRight, Loader2 } from 'lucide-react';
+import {
+  Search,
+  Sparkles,
+  MapPin,
+  Users,
+  Calendar,
+  ArrowRight,
+  Loader2,
+  Compass,
+} from 'lucide-react';
 import { Input, Label, Select } from '@/components/ui/input';
 import { Button, buttonClasses } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { Alert } from '@/components/ui/alert';
+import { Alert, Skeleton } from '@/components/ui/alert';
+import { EmptyState } from '@/components/ui/empty-state';
+import { AnimatedScoreRing } from '@/components/motion/primitives';
 import { formatMinorCurrency, formatShortDate } from '@/lib/utils';
 import { EVENT_CATEGORIES } from '@/lib/validation/events';
 import type { EventRow, SponsorshipPackageRow } from '@/types/database';
@@ -99,7 +110,7 @@ export function DiscoverEventsClient({ hasSponsorProfile }: { hasSponsorProfile:
       });
       const json = await res.json();
       if (!res.ok) {
-        setError(json.message ?? 'Could not refresh AI match explanations.');
+        setError(json.message ?? 'Could not refresh match explanations.');
         return;
       }
       const nextMap: Record<
@@ -123,12 +134,12 @@ export function DiscoverEventsClient({ hasSponsorProfile }: { hasSponsorProfile:
   return (
     <div className="space-y-6">
       <Card>
-        <CardContent className="p-5">
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+        <CardContent className="p-5 sm:p-6">
+          <div className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-5">
             <div className="lg:col-span-2">
               <Label htmlFor="discQ">Search Keywords or Tags</Label>
               <div className="relative">
-                <Search className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                <Search className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-stone-400" />
                 <Input
                   id="discQ"
                   className="pl-9"
@@ -169,19 +180,20 @@ export function DiscoverEventsClient({ hasSponsorProfile }: { hasSponsorProfile:
                 type="number"
                 min={50}
                 placeholder="2500"
+                className="font-mono"
                 value={maxBudgetUsd}
                 onChange={(e) => setMaxBudgetUsd(e.target.value)}
               />
             </div>
           </div>
 
-          <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-            <Button variant="outline" size="sm" onClick={fetchEvents}>
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-stone-100 pt-4">
+            <Button variant="primary" size="sm" onClick={fetchEvents}>
               Apply Filters
             </Button>
             {hasSponsorProfile && (
               <Button
-                variant="secondary"
+                variant="outline"
                 size="sm"
                 disabled={refreshingMatches}
                 onClick={runAiMatchRefresh}
@@ -189,9 +201,9 @@ export function DiscoverEventsClient({ hasSponsorProfile }: { hasSponsorProfile:
                 {refreshingMatches ? (
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
                 ) : (
-                  <Sparkles className="h-3.5 w-3.5" />
+                  <Sparkles className="h-3.5 w-3.5 text-emerald-700" />
                 )}
-                Generate AI Match Explanations
+                Refresh Compatibility Insights
               </Button>
             )}
           </div>
@@ -201,22 +213,17 @@ export function DiscoverEventsClient({ hasSponsorProfile }: { hasSponsorProfile:
       {error && <Alert tone="error">{error}</Alert>}
 
       {loading ? (
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-5 md:grid-cols-2">
           {[1, 2].map((i) => (
-            <div key={i} className="h-56 animate-pulse rounded-2xl border border-slate-200 bg-white" />
+            <Skeleton key={i} className="h-64 w-full rounded-2xl" />
           ))}
         </div>
       ) : events.length === 0 ? (
-        <Card>
-          <CardContent className="p-8 text-center">
-            <p className="text-sm font-medium text-slate-900">
-              No approved events match your current filters
-            </p>
-            <p className="mt-1 text-xs text-slate-500">
-              Only admin-approved or published events appear in Sponsor Discovery.
-            </p>
-          </CardContent>
-        </Card>
+        <EmptyState
+          icon={<Compass className="h-5 w-5" />}
+          title="No approved events match your current filters"
+          description="Only admin-approved or published events appear in Sponsor Discovery. Try clearing filters to inspect all live listings."
+        />
       ) : (
         <div className="grid gap-5 md:grid-cols-2">
           {events.map((ev) => {
@@ -225,61 +232,64 @@ export function DiscoverEventsClient({ hasSponsorProfile }: { hasSponsorProfile:
               ? Math.min(...ev.sponsorship_packages.map((p) => p.price_minor))
               : ev.sponsorship_target_minor;
             return (
-              <Card key={ev.id} className="flex flex-col justify-between">
+              <Card key={ev.id} interactive className="flex flex-col justify-between overflow-hidden">
                 <CardContent className="p-6 space-y-4">
                   <div className="flex items-start justify-between gap-3">
-                    <div>
+                    <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
                         <Badge variant="mint">{ev.category}</Badge>
                         {ev.organizer_profiles?.verification_status === 'verified' && (
-                          <Badge variant="blue">Verified Society</Badge>
+                          <Badge variant="blue" dot>
+                            Verified Society
+                          </Badge>
                         )}
                         {ev.is_demo && <Badge variant="amber">Demo</Badge>}
                       </div>
-                      <h3 className="mt-2 font-display text-lg font-bold text-slate-950">
+                      <h3 className="mt-2.5 font-display text-lg font-bold text-[#0c121e]">
                         {ev.title}
                       </h3>
-                      <p className="text-xs text-slate-500">
-                        {ev.organizer_profiles?.society_name ?? 'University Society'} •{' '}
+                      <p className="mt-0.5 text-xs text-stone-500">
+                        {ev.organizer_profiles?.society_name ?? 'University Society'} ·{' '}
                         {ev.organizer_profiles?.university_name ?? ev.city}
                       </p>
                     </div>
                     {ev.matchPreview && (
-                      <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-right shrink-0">
-                        <p className="font-mono text-lg font-bold text-emerald-700">
-                          {ev.matchPreview.score}
-                          <span className="text-[11px] font-normal">/100</span>
-                        </p>
-                        <p className="text-[10px] font-medium text-emerald-800">Profile Match</p>
+                      <div className="flex flex-col items-center shrink-0">
+                        <AnimatedScoreRing score={ev.matchPreview.score} size={52} />
+                        <span className="mt-1 text-xs font-medium text-stone-500">
+                          Match
+                        </span>
                       </div>
                     )}
                   </div>
 
-                  <p className="line-clamp-2 text-sm text-slate-600">{ev.description}</p>
+                  <p className="line-clamp-2 text-sm leading-relaxed text-stone-600">
+                    {ev.description}
+                  </p>
 
-                  <div className="grid grid-cols-3 gap-2 text-xs text-slate-600">
-                    <div className="flex items-center gap-1.5">
-                      <MapPin className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                  <div className="grid grid-cols-3 gap-2 border-y border-stone-100 py-3 text-xs text-stone-600">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <MapPin className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
                       <span className="truncate">{ev.city}</span>
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <Users className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                      <Users className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
                       <span>{ev.expected_attendees} est.</span>
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <Calendar className="h-3.5 w-3.5 text-slate-400 shrink-0" />
-                      <span>{formatShortDate(ev.starts_at)}</span>
+                      <Calendar className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+                      <span className="truncate">{formatShortDate(ev.starts_at)}</span>
                     </div>
                   </div>
 
                   {(exp || ev.matchPreview) && (
-                    <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs text-slate-700">
-                      <p className="font-semibold text-slate-900">
+                    <div className="rounded-xl border border-stone-200/80 bg-[#faf9f6] p-3.5 text-xs text-stone-700">
+                      <p className="font-semibold text-[#0c121e]">
                         {exp
                           ? exp.source === 'ai_provider'
                             ? 'Why this match works'
                             : 'Compatibility Summary'
-                          : 'Sponsor Compatibility Breakdown'}
+                          : 'Sponsor Compatibility Summary'}
                       </p>
                       <p className="mt-1 leading-relaxed">
                         {exp ? exp.explanation : ev.matchPreview?.deterministicExplanation}
@@ -287,10 +297,10 @@ export function DiscoverEventsClient({ hasSponsorProfile }: { hasSponsorProfile:
                     </div>
                   )}
 
-                  <div className="flex items-center justify-between gap-3 border-t border-slate-100 pt-3">
+                  <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
                     <div>
-                      <p className="text-[11px] text-slate-500">Packages starting from</p>
-                      <p className="font-mono text-sm font-bold text-slate-950">
+                      <p className="text-[11px] font-medium text-stone-500">Packages starting from</p>
+                      <p className="font-mono text-base font-bold text-[#0c121e] tabular-nums">
                         {formatMinorCurrency(minPrice, ev.currency)}
                       </p>
                     </div>

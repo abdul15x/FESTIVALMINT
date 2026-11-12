@@ -114,10 +114,10 @@ export function PayPalCheckoutClient({
             <CardTitle>PayPal Sandbox Checkout</CardTitle>
             <CardDescription>
               Order totals are locked on our server from the accepted proposal record and verified
-              on capture via `@paypal/paypal-server-sdk`.
+              on capture through PayPal Sandbox.
             </CardDescription>
           </div>
-          <Badge variant="blue">Orders v2 Sandbox</Badge>
+          <Badge variant="blue">PayPal Sandbox</Badge>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">

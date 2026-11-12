@@ -321,7 +321,7 @@ export function FulfillmentReportClient({
                         />
                       </div>
                       <div>
-                        <Label htmlFor={`url-${d.id}`}>Proof URL (Optional fallback)</Label>
+                        <Label htmlFor={`url-${d.id}`}>Proof URL (Optional)</Label>
                         <div className="relative">
                           <Link2 className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-slate-400" />
                           <Input
@@ -444,8 +444,8 @@ export function FulfillmentReportClient({
                     }
                   >
                     {reportView.report.generationSource === 'ai_provider'
-                      ? 'AI-Generated Analysis'
-                      : 'Deterministic Fallback Audit'}
+                      ? 'Created with FestivalMint AI'
+                      : 'Verified Evidence Summary'}
                   </Badge>
                 </div>
               </div>

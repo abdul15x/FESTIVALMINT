@@ -93,8 +93,12 @@ export function PackageStudio({
       setGenerationMeta({
         source: data.source,
         providerLabel: data.providerLabel,
-        assumptions: data.result.assumptions,
-        warnings: data.result.warnings,
+        assumptions: data.result.assumptions.filter(
+          (item) => !/deterministic|heuristic|api key/i.test(item)
+        ),
+        warnings: data.result.warnings.filter(
+          (item) => !/deterministic fallback output/i.test(item)
+        ),
       });
 
       setPackages(
@@ -248,11 +252,15 @@ export function PackageStudio({
           {generationMeta && (
             <Alert
               tone={generationMeta.source === 'ai_provider' ? 'info' : 'warning'}
-              title={`Source: ${generationMeta.providerLabel}`}
+              title={
+                generationMeta.source === 'ai_provider'
+                  ? 'Created with FestivalMint AI'
+                  : 'Suggested Sponsorship Packages'
+              }
             >
               <p className="text-xs">
-                All suggested prices require organizer review and do not represent market
-                guarantees.
+                All suggested prices require organizer review and can be customized freely before
+                publishing.
               </p>
               {generationMeta.warnings.length > 0 && (
                 <ul className="mt-1.5 list-disc pl-4 text-xs">
@@ -285,7 +293,7 @@ export function PackageStudio({
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
                       <Badge variant={pkg.aiGenerated ? 'mint' : 'neutral'}>
-                        {pkg.aiGenerated ? 'AI Suggested (Editable)' : 'Organizer / Heuristic'}
+                        {pkg.aiGenerated ? 'Created with AI' : 'Custom Tier'}
                       </Badge>
                       <span className="font-mono text-xs text-slate-500">Tier #{idx + 1}</span>
                     </div>

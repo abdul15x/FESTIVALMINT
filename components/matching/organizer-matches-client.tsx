@@ -106,8 +106,8 @@ export function OrganizerMatchesClient({
       setProposalMessage(json.data.message);
       setFeedback(
         json.data.source === 'ai_provider'
-          ? 'Drafted personalized outreach message with AI.'
-          : 'Generated editable template (deterministic fallback — no live AI key).'
+          ? 'Drafted personalized outreach message with FestivalMint AI.'
+          : 'Generated an editable outreach template for your review.'
       );
     } catch {
       setError('Network error drafting proposal message.');
@@ -151,7 +151,7 @@ export function OrganizerMatchesClient({
     return (
       <Card>
         <CardContent className="p-8 text-center text-sm text-slate-600">
-          Create an event first to run explainable sponsor matching.
+          Create an event first to unlock personalized sponsor matching.
         </CardContent>
       </Card>
     );
@@ -296,8 +296,8 @@ export function OrganizerMatchesClient({
                         }
                       >
                         {row.match.explanationSource === 'ai_provider'
-                          ? 'AI Explanation'
-                          : 'Deterministic Explanation'}
+                          ? 'Recommended Match Insight'
+                          : 'Match Summary'}
                       </Badge>
                       {row.sponsor.is_demo && <Badge variant="amber">Demo</Badge>}
                     </div>

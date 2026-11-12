@@ -53,7 +53,7 @@ Missing Info: ${match.missingInformation.join('; ') || 'None'}
 
   return {
     ...match,
-    explanation: `${match.deterministicExplanation} (Deterministic explanation — no live AI explanation generated.)`,
+    explanation: match.deterministicExplanation,
     explanationSource: 'deterministic_fallback',
   };
 }

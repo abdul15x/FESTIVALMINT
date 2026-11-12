@@ -15,17 +15,17 @@ export function SiteHeader() {
         <BrandLogo />
 
         <nav className="hidden items-center gap-7 text-sm font-medium text-slate-600 md:flex">
-          <a href="#how-it-works" className="hover:text-slate-950 transition-colors">
+          <Link href="/#how-it-works" className="hover:text-slate-950 transition-colors">
             How It Works
-          </a>
-          <a href="#features" className="hover:text-slate-950 transition-colors">
+          </Link>
+          <Link href="/#features" className="hover:text-slate-950 transition-colors">
             Features
-          </a>
-          <a href="#demo-events" className="hover:text-slate-950 transition-colors">
-            Featured Events
-          </a>
+          </Link>
+          <Link href="/#demo-events" className="hover:text-slate-950 transition-colors">
+            Explore Events
+          </Link>
           <Link href="/sponsor/discover" className="hover:text-slate-950 transition-colors">
-            Discover
+            Sponsor Portal
           </Link>
         </nav>
 
@@ -53,33 +53,33 @@ export function SiteHeader() {
       {mobileOpen && (
         <div className="border-t border-slate-200 bg-white px-4 py-4 md:hidden">
           <nav className="flex flex-col gap-3 text-sm font-medium text-slate-700">
-            <a
-              href="#how-it-works"
+            <Link
+              href="/#how-it-works"
               onClick={() => setMobileOpen(false)}
               className="rounded-lg px-2 py-1.5 hover:bg-slate-50"
             >
               How It Works
-            </a>
-            <a
-              href="#features"
+            </Link>
+            <Link
+              href="/#features"
               onClick={() => setMobileOpen(false)}
               className="rounded-lg px-2 py-1.5 hover:bg-slate-50"
             >
               Features
-            </a>
-            <a
-              href="#demo-events"
+            </Link>
+            <Link
+              href="/#demo-events"
               onClick={() => setMobileOpen(false)}
               className="rounded-lg px-2 py-1.5 hover:bg-slate-50"
             >
-              Featured Events
-            </a>
+              Explore Events
+            </Link>
             <Link
               href="/sponsor/discover"
               onClick={() => setMobileOpen(false)}
               className="rounded-lg px-2 py-1.5 hover:bg-slate-50"
             >
-              Discover Events
+              Sponsor Portal
             </Link>
             <div className="mt-2 flex flex-col gap-2 border-t border-slate-100 pt-3">
               <Link

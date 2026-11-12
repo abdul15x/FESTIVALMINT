@@ -20,7 +20,7 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: 'FESTIVALMINT AI — Great University Events Deserve the Right Sponsors',
   description:
-    'AI-powered university sponsorship marketplace connecting student societies and events with relevant sponsors—from package generation and explainable matching to PayPal Sandbox checkout and fulfillment reporting.',
+    'University sponsorship marketplace connecting student societies and events with relevant brand sponsors—from smart package creation and match insights to PayPal Sandbox checkout and verified fulfillment reports.',
 };
 
 export default function RootLayout({ children }: LayoutProps<'/'>) {

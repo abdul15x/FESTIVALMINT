@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
   return apiSuccess(
     outcome,
     outcome.source === 'ai_provider'
-      ? `Packages generated via ${outcome.providerLabel}. Review and save before publishing.`
-      : 'AI key unavailable/failed; generated clearly labeled deterministic fallback packages.'
+      ? 'Created with FestivalMint AI. Review and customize packages before saving.'
+      : 'Generated structured package suggestions from your event details. Review and customize before saving.'
   );
 }

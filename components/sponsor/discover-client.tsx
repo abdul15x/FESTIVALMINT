@@ -277,9 +277,9 @@ export function DiscoverEventsClient({ hasSponsorProfile }: { hasSponsorProfile:
                       <p className="font-semibold text-slate-900">
                         {exp
                           ? exp.source === 'ai_provider'
-                            ? 'AI Match Explanation'
-                            : 'Deterministic Match Explanation'
-                          : 'Match Score Breakdown (Profile Compatibility)'}
+                            ? 'Why this match works'
+                            : 'Compatibility Summary'
+                          : 'Sponsor Compatibility Breakdown'}
                       </p>
                       <p className="mt-1 leading-relaxed">
                         {exp ? exp.explanation : ev.matchPreview?.deterministicExplanation}

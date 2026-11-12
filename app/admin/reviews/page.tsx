@@ -34,8 +34,8 @@ export default async function AdminReviewsPage() {
         <div>
           <h1 className="font-display text-2xl font-bold text-slate-950">Verification Queue</h1>
           <p className="mt-1 text-sm text-slate-600">
-            Approve or reject societies and event listings. All decisions write to{' '}
-            <code className="font-mono text-xs">audit_logs</code>.
+            Approve or reject societies and event listings. All moderation decisions are recorded in
+            the governance log.
           </p>
         </div>
         <ReviewQueueClient organizers={organizers ?? []} events={events ?? []} />

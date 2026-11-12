@@ -110,7 +110,7 @@ export function ReviewQueueClient({
                     value={notes[org.id] ?? ''}
                     onChange={(e) => setNotes({ ...notes, [org.id]: e.target.value })}
                   />
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap gap-2">
                     <Button
                       size="sm"
                       variant="secondary"
@@ -179,7 +179,7 @@ export function ReviewQueueClient({
                     value={notes[ev.id] ?? ''}
                     onChange={(e) => setNotes({ ...notes, [ev.id]: e.target.value })}
                   />
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap gap-2">
                     <Button
                       size="sm"
                       variant="secondary"

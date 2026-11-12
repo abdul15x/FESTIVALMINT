@@ -100,14 +100,14 @@ export function SponsorEventDetailClient({
           <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3">
             <div>
               <div className="flex flex-wrap items-center gap-2">
-                <CardTitle>Compatibility & AI Fit Analysis</CardTitle>
+                <CardTitle>Sponsor Compatibility</CardTitle>
                 <Badge variant={match.score >= 70 ? 'mint' : 'blue'}>
                   {match.score}/100 ({match.confidence} confidence)
                 </Badge>
                 <Badge variant={match.explanationSource === 'ai_provider' ? 'blue' : 'neutral'}>
                   {match.explanationSource === 'ai_provider'
-                    ? 'AI-Generated Fit Explanation'
-                    : 'Deterministic Compatibility Summary'}
+                    ? 'Why This Match Works'
+                    : 'Compatibility Summary'}
                 </Badge>
               </div>
               <CardDescription>
@@ -122,7 +122,7 @@ export function SponsorEventDetailClient({
                 ) : (
                   <Sparkles className="h-3.5 w-3.5" />
                 )}
-                Refresh AI Rationale
+                Refresh Match Insight
               </Button>
             )}
           </CardHeader>

@@ -9,15 +9,15 @@ export function SiteFooter() {
           <div>
             <BrandLogo dark />
             <p className="mt-4 max-w-sm text-sm leading-relaxed text-slate-400">
-              AI-powered sponsorship marketplace connecting university societies and event
-              organizers with compatible brand sponsors—with explainable matching, PayPal Sandbox
-              checkout, and deliverable reporting.
+              AI-assisted university sponsorship marketplace connecting student societies and event
+              organizers with relevant brand sponsors—from package creation and match insights to
+              PayPal Sandbox checkout and proof-backed deliverable reporting.
             </p>
           </div>
 
           <div className="grid grid-cols-2 gap-6 text-sm">
             <div>
-              <p className="font-semibold text-white">Platform</p>
+              <p className="font-semibold text-white">Marketplace</p>
               <ul className="mt-3 space-y-2 text-slate-400">
                 <li>
                   <Link href="/organizer/dashboard" className="hover:text-emerald-400">
@@ -31,7 +31,7 @@ export function SiteFooter() {
                 </li>
                 <li>
                   <Link href="/auth/sign-up" className="hover:text-emerald-400">
-                    Create Account
+                    Get Started
                   </Link>
                 </li>
                 <li>
@@ -42,21 +42,21 @@ export function SiteFooter() {
               </ul>
             </div>
             <div>
-              <p className="font-semibold text-white">Governance</p>
+              <p className="font-semibold text-white">Platform</p>
               <ul className="mt-3 space-y-2 text-slate-400">
                 <li>
-                  <Link href="/admin/dashboard" className="hover:text-emerald-400">
-                    Admin Moderation
+                  <Link href="/#how-it-works" className="hover:text-emerald-400">
+                    How It Works
                   </Link>
                 </li>
                 <li>
-                  <a href="#how-it-works" className="hover:text-emerald-400">
-                    Matching Model
-                  </a>
+                  <Link href="/#features" className="hover:text-emerald-400">
+                    Capabilities
+                  </Link>
                 </li>
                 <li>
-                  <Link href="/api/health" className="hover:text-emerald-400">
-                    System Health
+                  <Link href="/admin/dashboard" className="hover:text-emerald-400">
+                    Campus Governance
                   </Link>
                 </li>
               </ul>
@@ -64,22 +64,21 @@ export function SiteFooter() {
           </div>
 
           <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 text-xs leading-relaxed text-slate-400">
-            <p className="font-semibold text-slate-200">Hackathon MVP Disclosures</p>
+            <p className="font-semibold text-slate-200">PayPal Sandbox &amp; Verification Note</p>
             <p className="mt-1.5">
-              All checkout flows run exclusively on <strong>PayPal Sandbox</strong> against a
-              single configured demo merchant account (no real funds, escrow, or multi-party
-              settlement). AI pricing and match explanations rely solely on user-supplied facts and
-              clearly label estimates.
+              All checkout flows in this environment run exclusively on{' '}
+              <strong>PayPal Sandbox</strong> against a configured demo merchant account—no real
+              funds are transferred. Package estimates and compatibility insights rely strictly on
+              event and sponsor facts.
             </p>
           </div>
         </div>
 
         <div className="mt-10 flex flex-col items-start justify-between gap-3 border-t border-slate-800 pt-6 text-xs text-slate-500 sm:flex-row sm:items-center">
-          <p>FESTIVALMINT AI — Build What&apos;s Next with PayPal and AI Hackathon Prototype.</p>
-          <p>Built with Next.js, TypeScript, Supabase, PayPal Server SDK &amp; APIMatic Context Plugin.</p>
+          <p>FESTIVALMINT AI — University Event Sponsorship Marketplace.</p>
+          <p>Structured packages, sponsor matching, PayPal Sandbox checkout &amp; proof tracking.</p>
         </div>
       </div>
     </footer>
   );
 }
-

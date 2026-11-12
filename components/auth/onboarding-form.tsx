@@ -276,7 +276,7 @@ export function SponsorOnboardingForm({ defaultEmail }: { defaultEmail: string }
       <CardHeader>
         <CardTitle>Complete Your Brand / Sponsor Profile</CardTitle>
         <CardDescription>
-          Our deterministic matching engine uses these preferences to rank university events.
+          FestivalMint AI uses these preferences to match your brand with relevant university events.
         </CardDescription>
       </CardHeader>
       <CardContent>

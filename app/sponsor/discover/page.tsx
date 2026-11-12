@@ -14,8 +14,8 @@ export default async function SponsorDiscoverPage() {
             Discover University Events
           </h1>
           <p className="mt-1 text-sm text-slate-600">
-            Browse admin-approved campus events ranked by deterministic 6-factor compatibility and
-            optional AI fit explanations.
+            Browse verified university events ranked by audience alignment, budget fit, and brand
+            objectives.
           </p>
         </div>
 

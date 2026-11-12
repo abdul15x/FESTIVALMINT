@@ -136,6 +136,41 @@ test('generateStructuredJson maps Gemini 429 rate limits, 401 auth errors, timeo
       assert.equal(badSchema.reason, 'invalid_schema');
     }
 
+    // 404 model deprecation fallback check
+    const requestedUrls: string[] = [];
+    globalThis.fetch = (async (input: RequestInfo | URL) => {
+      const url = typeof input === 'string' ? input : input.toString();
+      requestedUrls.push(url);
+      if (requestedUrls.length === 1) {
+        return new Response(
+          JSON.stringify({ error: { code: 404, message: 'model not available' } }),
+          { status: 404 }
+        );
+      }
+      return new Response(
+        JSON.stringify({ candidates: [{ content: { parts: [{ text: '{"okLabel":"fallback_ok"}' }] } }] }),
+        { status: 200 }
+      );
+    }) as typeof fetch;
+    const prevModel = process.env.GEMINI_MODEL;
+    process.env.GEMINI_MODEL = 'gemini-2.5-flash';
+    try {
+      const fallbackRes = await generateStructuredJson({
+        systemInstruction: 'sys',
+        userPrompt: 'usr',
+        schema: testSchema,
+      });
+      assert.equal(fallbackRes.ok, true);
+      if (fallbackRes.ok) {
+        assert.equal(fallbackRes.data.okLabel, 'fallback_ok');
+        assert.equal(fallbackRes.model, 'gemini-3-flash-preview');
+      }
+      assert.equal(requestedUrls.length, 2);
+    } finally {
+      if (prevModel === undefined) delete process.env.GEMINI_MODEL;
+      else process.env.GEMINI_MODEL = prevModel;
+    }
+
     // Valid structured JSON check
     globalThis.fetch = (async () =>
       new Response(
@@ -158,6 +193,41 @@ test('generateStructuredJson maps Gemini 429 rate limits, 401 auth errors, timeo
     else process.env.AI_PROVIDER = prevProvider;
     if (prevGeminiKey === undefined) delete process.env.GEMINI_API_KEY;
     else process.env.GEMINI_API_KEY = prevGeminiKey;
+  }
+});
+
+test('diagnostics accept AQ.* Gemini keys and flag identical PayPal Client ID and Secret', () => {
+  const prevGeminiKey = process.env.GEMINI_API_KEY;
+  const prevProvider = process.env.AI_PROVIDER;
+  const prevPpId = process.env.PAYPAL_CLIENT_ID;
+  const prevPpSecret = process.env.PAYPAL_CLIENT_SECRET;
+
+  try {
+    process.env.AI_PROVIDER = 'gemini';
+    process.env.GEMINI_API_KEY = 'AQ.TestMockGeminiKeyFormat1234567890abcdefghij';
+
+    const sampleClientId = 'AUj8MockPayPalClientIdForStructuralValidationOnly0123456789';
+    process.env.PAYPAL_CLIENT_ID = sampleClientId;
+    process.env.PAYPAL_CLIENT_SECRET = sampleClientId;
+
+    const diag = getDetailedIntegrationDiagnostics();
+    assert.equal(diag.gemini.structurallyValid, true);
+    assert.equal(diag.gemini.status, 'configured');
+
+    assert.equal(diag.paypalServer.clientIdValid, true);
+    assert.equal(diag.paypalServer.clientIdEqualsSecret, true);
+    assert.equal(diag.paypalServer.clientSecretValid, false);
+    assert.equal(diag.paypalServer.structurallyValid, false);
+    assert.equal(diag.paypalServer.status, 'invalid_format');
+  } finally {
+    if (prevGeminiKey === undefined) delete process.env.GEMINI_API_KEY;
+    else process.env.GEMINI_API_KEY = prevGeminiKey;
+    if (prevProvider === undefined) delete process.env.AI_PROVIDER;
+    else process.env.AI_PROVIDER = prevProvider;
+    if (prevPpId === undefined) delete process.env.PAYPAL_CLIENT_ID;
+    else process.env.PAYPAL_CLIENT_ID = prevPpId;
+    if (prevPpSecret === undefined) delete process.env.PAYPAL_CLIENT_SECRET;
+    else process.env.PAYPAL_CLIENT_SECRET = prevPpSecret;
   }
 });
 

@@ -78,23 +78,39 @@ async function runLiveChecks(diag) {
   // 2. Live Gemini check
   const aiCfg = getAiConfig();
   if (aiCfg && aiCfg.provider === 'gemini') {
+    const candidateModels = [
+      aiCfg.model,
+      ...['gemini-3-flash-preview', 'gemini-3.1-flash-lite-preview'].filter(
+        (m) => m !== aiCfg.model
+      ),
+    ];
     try {
-      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(
-        aiCfg.model
-      )}:generateContent?key=${encodeURIComponent(aiCfg.apiKey)}`;
-      const res = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ role: 'user', parts: [{ text: 'Return JSON: {"ok":true}' }] }],
-          generationConfig: { responseMimeType: 'application/json' },
-        }),
-        signal: AbortSignal.timeout(10_000),
-      });
-      if (res.ok) {
-        diag.gemini.externalAuth = 'verified';
-        diag.gemini.fullIntegration = 'verified';
-      } else {
+      let verified = false;
+      for (const candidateModel of candidateModels) {
+        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(
+          candidateModel
+        )}:generateContent?key=${encodeURIComponent(aiCfg.apiKey)}`;
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ role: 'user', parts: [{ text: 'Return JSON: {"ok":true}' }] }],
+            generationConfig: { responseMimeType: 'application/json' },
+          }),
+          signal: AbortSignal.timeout(10_000),
+        });
+        if (res.ok) {
+          diag.gemini.externalAuth = 'verified';
+          diag.gemini.fullIntegration = 'verified';
+          diag.gemini.model = candidateModel;
+          verified = true;
+          break;
+        }
+        if (res.status !== 404) {
+          break;
+        }
+      }
+      if (!verified) {
         diag.gemini.externalAuth = 'failed';
       }
     } catch {

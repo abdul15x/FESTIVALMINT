@@ -49,6 +49,7 @@ export interface DetailedIntegrationDiagnostics {
     present: boolean;
     clientIdValid: boolean;
     clientSecretValid: boolean;
+    clientIdEqualsSecret: boolean;
     structurallyValid: boolean;
     status: CredentialStatus;
     externalAuth: VerificationStage;
@@ -133,7 +134,10 @@ export function isValidSupabaseUrl(url: string): boolean {
 }
 
 export function isValidGeminiKey(key: string): boolean {
-  return isConfiguredValue(key) && /^AIza[A-Za-z0-9_-]{20,}$/.test(key);
+  return (
+    isConfiguredValue(key) &&
+    /^(AIza[A-Za-z0-9_-]{20,}|AQ\.[A-Za-z0-9._-]{20,})$/.test(key)
+  );
 }
 
 export function isValidPayPalCredentialFormat(value: string): boolean {
@@ -189,7 +193,7 @@ export function getAiConfig() {
     return {
       provider: 'gemini' as const,
       apiKey: geminiKey,
-      model: readEnv('GEMINI_MODEL') || 'gemini-2.5-flash',
+      model: readEnv('GEMINI_MODEL') || 'gemini-3-flash-preview',
     };
   }
   if (openaiKey) {
@@ -263,8 +267,12 @@ export function getDetailedIntegrationDiagnostics(): DetailedIntegrationDiagnost
   const paypalEnvMode = readEnv('PAYPAL_ENV').toLowerCase() === 'live' ? 'live' : 'sandbox';
   const rawPayPalClientId = readEnv('PAYPAL_CLIENT_ID');
   const rawPayPalSecret = readEnv('PAYPAL_CLIENT_SECRET');
+  const clientIdEqualsSecret = Boolean(
+    rawPayPalClientId && rawPayPalSecret && rawPayPalClientId === rawPayPalSecret
+  );
   const clientIdValid = isValidPayPalCredentialFormat(rawPayPalClientId);
-  const clientSecretValid = isValidPayPalCredentialFormat(rawPayPalSecret);
+  const clientSecretValid =
+    isValidPayPalCredentialFormat(rawPayPalSecret) && !clientIdEqualsSecret;
   const paypalServerValid = clientIdValid && clientSecretValid;
   const paypalServerStatus: CredentialStatus = !rawPayPalClientId || !rawPayPalSecret
     ? 'missing'
@@ -319,7 +327,7 @@ export function getDetailedIntegrationDiagnostics(): DetailedIntegrationDiagnost
       present: Boolean(rawGemini && !isPlaceholderValue(rawGemini)),
       structurallyValid: geminiValid,
       status: geminiStatus,
-      model: readEnv('GEMINI_MODEL') || 'gemini-2.5-flash',
+      model: readEnv('GEMINI_MODEL') || 'gemini-3-flash-preview',
       externalAuth: 'not_verified',
       fullIntegration: 'not_verified',
     },
@@ -328,6 +336,7 @@ export function getDetailedIntegrationDiagnostics(): DetailedIntegrationDiagnost
       present: Boolean(rawPayPalClientId && rawPayPalSecret),
       clientIdValid,
       clientSecretValid,
+      clientIdEqualsSecret,
       structurallyValid: paypalServerValid,
       status: paypalServerStatus,
       externalAuth: 'not_verified',

@@ -70,48 +70,67 @@ export async function generateStructuredJson<T>(options: {
 
   try {
     let rawText = '';
+    let activeModel = config.model;
 
     if (config.provider === 'gemini') {
-      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(
-        config.model
-      )}:generateContent?key=${encodeURIComponent(config.apiKey)}`;
+      const candidateModels = [
+        config.model,
+        ...['gemini-3-flash-preview', 'gemini-3.1-flash-lite-preview'].filter(
+          (m) => m !== config.model
+        ),
+      ];
 
-      const res = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        signal: controller.signal,
-        body: JSON.stringify({
-          systemInstruction: {
-            parts: [{ text: options.systemInstruction }],
-          },
-          contents: [
-            {
-              role: 'user',
-              parts: [{ text: options.userPrompt }],
+      let lastRes: Response | null = null;
+      for (const candidateModel of candidateModels) {
+        activeModel = candidateModel;
+        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(
+          candidateModel
+        )}:generateContent?key=${encodeURIComponent(config.apiKey)}`;
+
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          signal: controller.signal,
+          body: JSON.stringify({
+            systemInstruction: {
+              parts: [{ text: options.systemInstruction }],
             },
-          ],
-          generationConfig: {
-            temperature: 0.25,
-            responseMimeType: 'application/json',
-          },
-        }),
-      });
+            contents: [
+              {
+                role: 'user',
+                parts: [{ text: options.userPrompt }],
+              },
+            ],
+            generationConfig: {
+              temperature: 0.25,
+              responseMimeType: 'application/json',
+            },
+          }),
+        });
 
-      if (!res.ok) {
+        lastRes = res;
+        if (res.status === 404) {
+          continue;
+        }
+        break;
+      }
+
+      if (!lastRes || !lastRes.ok) {
+        const status = lastRes?.status ?? 500;
         const reason =
-          res.status === 429
+          status === 429
             ? 'rate_limited'
-            : res.status === 401 || res.status === 403
+            : status === 401 || status === 403
               ? 'auth_error'
               : 'provider_error';
         return {
           ok: false,
           reason,
-          message: `Gemini API returned HTTP ${res.status}`,
+          message: `Gemini API returned HTTP ${status}`,
         };
       }
 
-      const payload = (await res.json()) as {
+      const payload = (await lastRes.json()) as {
         candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
       };
       rawText = payload.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
@@ -168,7 +187,7 @@ export async function generateStructuredJson<T>(options: {
       ok: true,
       data: validated.data,
       provider: config.provider,
-      model: config.model,
+      model: activeModel,
     };
   } catch (err) {
     if (err instanceof Error && err.name === 'AbortError') {

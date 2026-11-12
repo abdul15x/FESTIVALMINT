@@ -11,11 +11,12 @@ npm run build          # Next.js production compilation check
 
 ---
 
-## 2. Automated Test Suite Plan (Created & Expanded in Sprints 3–7)
-1. `tests/validation.test.ts` — Event, Sponsor, Package, Proposal Zod validation edge cases (invalid dates, negative prices, oversized text).
-2. `tests/matching.test.ts` — Deterministic 6-factor scoring verification (high-fit vs. low-fit seeded sponsor pairs, missing fields lowering confidence, score bounded 0–100).
-3. `tests/paypal-security.test.ts` — Server-side amount lookup verification (client-tampered amounts ignored), state transition guards (`draft`/`sent`/`paid` proposals cannot re-checkout), webhook event deduplication logic.
-4. `tests/evidence-validation.test.ts` — Allowed MIME type/extension/file-size enforcement and report missing-deliverable preservation.
+## 2. Automated Test Suite (`npm test` — 18/18 Passing)
+1. `tests/sprint2-auth.test.ts` (5 tests) — Role-locked signup rejecting `admin`, valid organizer/sponsor signup, sponsor budget bounds, organizer profile validation, admin review schema.
+2. `tests/sprint3-events-packages.test.ts` (3 tests) — Event date validation (`endsAt > startsAt`), deterministic Bronze/Silver/Gold package fallback, organizer package edit persistence validation.
+3. `tests/sprint4-matching.test.ts` (3 tests) — Deterministic 6-factor scoring ranking strong-fit vs. poor-fit sponsors, missing info confidence degradation, proposal creation & response schema guards.
+4. `tests/sprint5-paypal.test.ts` (4 tests) — Minor currency integer/decimal conversion without float drift, checkout state & ownership guards, PayPal capture tamper & status integrity checks, webhook duplicate ID idempotency & deliverable seeding.
+5. `tests/sprint6-evidence.test.ts` (3 tests) — File extension/MIME/10MB size limits rejecting `.exe` & oversized uploads, `http/https` URL validation, deterministic performance report preserving missing deliverables.
 
 ---
 

@@ -199,14 +199,27 @@ export default async function OrganizerDashboardPage() {
             ) : (
               <div className="divide-y divide-slate-100">
                 {proposalList.slice(0, 5).map((p) => (
-                  <div key={p.id} className="flex items-center justify-between py-3 text-sm">
+                  <div
+                    key={p.id}
+                    className="flex flex-wrap items-center justify-between gap-2 py-3 text-sm"
+                  >
                     <div>
                       <p className="font-mono text-xs text-slate-500">Proposal {p.id.slice(0, 8)}</p>
                       <p className="font-semibold text-slate-900">
                         {formatMinorCurrency(p.amount_minor, p.currency)}
                       </p>
                     </div>
-                    <Badge variant={p.status === 'paid' ? 'mint' : 'neutral'}>{p.status}</Badge>
+                    <div className="flex items-center gap-2">
+                      <Badge variant={p.status === 'paid' ? 'mint' : 'neutral'}>{p.status}</Badge>
+                      {p.status === 'paid' && (
+                        <Link
+                          href={`/organizer/reports/${p.id}`}
+                          className={buttonClasses('outline', 'sm')}
+                        >
+                          Report &amp; Proof
+                        </Link>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>

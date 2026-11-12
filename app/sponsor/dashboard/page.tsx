@@ -142,6 +142,56 @@ export default async function SponsorDashboardPage() {
             )}
           </CardContent>
         </Card>
+
+        {proposalList.length > 0 && (
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between gap-4">
+              <div>
+                <CardTitle>Recent Sponsorship Deals</CardTitle>
+                <CardDescription>
+                  Complete PayPal Sandbox checkout or review fulfillment evidence reports.
+                </CardDescription>
+              </div>
+              <Link href="/sponsor/proposals" className={buttonClasses('ghost', 'sm')}>
+                Manage All
+              </Link>
+            </CardHeader>
+            <CardContent className="divide-y divide-slate-100">
+              {proposalList.slice(0, 5).map((p) => (
+                <div
+                  key={p.id}
+                  className="flex flex-wrap items-center justify-between gap-2 py-3 text-sm"
+                >
+                  <div>
+                    <p className="font-mono text-xs text-slate-500">Deal {p.id.slice(0, 8)}</p>
+                    <p className="font-semibold text-slate-900">
+                      {formatMinorCurrency(p.amount_minor, p.currency)}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant={p.status === 'paid' ? 'mint' : 'amber'}>{p.status}</Badge>
+                    {['accepted', 'payment_pending'].includes(p.status) && (
+                      <Link
+                        href={`/sponsor/payments/${p.id}`}
+                        className={buttonClasses('primary', 'sm')}
+                      >
+                        PayPal Checkout
+                      </Link>
+                    )}
+                    {p.status === 'paid' && (
+                      <Link
+                        href={`/sponsor/reports/${p.id}`}
+                        className={buttonClasses('outline', 'sm')}
+                      >
+                        Fulfillment Report
+                      </Link>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        )}
       </div>
     </DashboardShell>
   );

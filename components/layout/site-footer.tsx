@@ -40,6 +40,11 @@ export function SiteFooter() {
                   </Link>
                 </li>
                 <li>
+                  <Link href="/pitch" className="text-emerald-400 hover:text-emerald-300 font-semibold transition-colors">
+                    Pitch &amp; Demo Video
+                  </Link>
+                </li>
+                <li>
                   <Link href="/auth/sign-up" className="hover:text-white transition-colors">
                     Create Account
                   </Link>

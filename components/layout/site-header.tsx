@@ -59,6 +59,12 @@ export function SiteHeader() {
           >
             Sponsor Portal
           </Link>
+          <Link
+            href="/pitch"
+            className="rounded-full px-3.5 py-1.5 font-semibold text-emerald-700 hover:bg-emerald-50 transition-colors"
+          >
+            Pitch Video
+          </Link>
         </nav>
 
         <div className="hidden items-center gap-2.5 md:flex">

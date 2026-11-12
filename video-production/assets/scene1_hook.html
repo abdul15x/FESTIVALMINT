@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Scene 1 — The Hook</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      width: 1920px;
+      height: 1080px;
+      background: #0c121e;
+      color: #ffffff;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+    .grid-bg {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+      background-size: 48px 48px;
+    }
+    .radial-glow {
+      position: absolute;
+      width: 1000px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(16, 185, 129, 0.16) 0%, rgba(6, 95, 70, 0.05) 50%, transparent 70%);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      filter: blur(60px);
+    }
+    .container {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      max-width: 1200px;
+      padding: 40px;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 18px;
+      border-radius: 9999px;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      color: #34d399;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 28px;
+      animation: fadeIn 0.8s ease forwards;
+    }
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 10px #10b981;
+    }
+    h1 {
+      font-size: 64px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      margin-bottom: 24px;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: slideUp 1s cubic-bezier(0.16, 1, 0.3, 1) 0.3s forwards;
+    }
+    .highlight {
+      background: linear-gradient(135deg, #ffffff 30%, #a7f3d0 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .accent-challenge {
+      color: #f87171;
+      display: inline-block;
+      margin-top: 10px;
+    }
+    p.subtitle {
+      font-size: 24px;
+      color: #94a3b8;
+      font-weight: 500;
+      line-height: 1.5;
+      max-width: 860px;
+      margin: 0 auto;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: slideUp 1s cubic-bezier(0.16, 1, 0.3, 1) 1.2s forwards;
+    }
+    .event-badges {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin-top: 48px;
+      opacity: 0;
+      animation: fadeIn 1s ease 2s forwards;
+    }
+    .badge {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 14px;
+      padding: 12px 24px;
+      font-size: 16px;
+      font-weight: 600;
+      color: #cbd5e1;
+    }
+
+    @keyframes slideUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      to { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div class="grid-bg"></div>
+  <div class="radial-glow"></div>
+  <div class="container">
+    <div class="pill">
+      <span class="dot"></span>
+      The Campus Sponsorship Dilemma
+    </div>
+    <h1>
+      <span class="highlight">Great events take months to plan.</span><br>
+      <span style="color: #64748b; font-size: 52px; font-weight: 600;">But finding the right sponsors?</span><br>
+      <span class="accent-challenge">That's another challenge.</span>
+    </h1>
+    <p class="subtitle">
+      Every great hackathon and tech festival needs financial backing. Yet organizers spend hundreds of hours stranded in spreadsheet chaos.
+    </p>
+    <div class="event-badges">
+      <div class="badge">Campus Hackathons</div>
+      <div class="badge">Tech Conferences</div>
+      <div class="badge">Student Societies</div>
+      <div class="badge">Innovation Summits</div>
+    </div>
+  </div>
+</body>
+</html>
+

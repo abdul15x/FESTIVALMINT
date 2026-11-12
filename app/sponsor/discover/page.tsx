@@ -1,17 +1,26 @@
 import { DashboardShell } from '@/components/layout/dashboard-shell';
-import { SprintShellCard } from '@/components/layout/sprint-shell-notice';
+import { requirePageSession } from '@/lib/auth/session';
+import { DiscoverEventsClient } from '@/components/sponsor/discover-client';
 
-export default function SponsorDiscoverPage() {
+export default async function SponsorDiscoverPage() {
+  const { context } = await requirePageSession({ allowedRoles: ['sponsor'] });
+  const sponsor = context.sponsorProfile;
+
   return (
-    <DashboardShell role="sponsor" userName="Sponsor Workspace">
-      <SprintShellCard
-        title="Discover University Events"
-        description="Browse and filter approved campus events with explainable compatibility scores."
-        sprintTarget="Sprint 4"
-        backHref="/sponsor/dashboard"
-        backLabel="Sponsor Dashboard"
-      />
+    <DashboardShell role="sponsor" userName={sponsor?.company_name ?? context.profile.full_name}>
+      <div className="space-y-6">
+        <div>
+          <h1 className="font-display text-2xl font-bold text-slate-950">
+            Discover University Events
+          </h1>
+          <p className="mt-1 text-sm text-slate-600">
+            Browse admin-approved campus events ranked by deterministic 6-factor compatibility and
+            optional AI fit explanations.
+          </p>
+        </div>
+
+        <DiscoverEventsClient hasSponsorProfile={Boolean(sponsor)} />
+      </div>
     </DashboardShell>
   );
 }
-

@@ -1,6 +1,6 @@
 # FESTIVALMINT AI — Project Status Tracker
 
-> **Current Phase:** Sprint 3 Complete → Starting Sprint 4 (Discovery, Matching & Proposals)  
+> **Current Phase:** Sprint 4 Complete → Starting Sprint 5 (APIMatic & PayPal Sandbox)  
 > **Overall Status:** Active Autonomous Execution (Sprints 2–8)  
 
 ---
@@ -8,16 +8,16 @@
 ## 1. Completed Features
 - **Sprint 1 (`480f9fa`):** Next.js 16 + TypeScript + Tailwind foundation, 17-table PostgreSQL schema & RLS migrations, seed SQL, UI primitives, landing page, `/api/health`.
 - **Sprint 2 (`259a3f7`):** Supabase Auth, role-locked onboarding, RBAC session guards, real Organizer/Sponsor/Admin dashboards, profile settings, admin review & moderation APIs, `scripts/seed-demo.mjs`, and `tests/sprint2-auth.test.ts` (5/5 pass).
-- **Sprint 3:** Event CRUD (`/api/events`, `/api/events/mine`, `/api/events/[id]`, `/api/events/[id]/submit`), `/organizer/events/new`, `/organizer/events/[id]`, AI sponsorship package generator (`POST /api/ai/packages`) with Gemini/OpenAI structured JSON + clearly labeled deterministic fallback, interactive `PackageStudio` editor + DB persistence (`PUT /api/events/[id]/packages`), and `tests/sprint3-events-packages.test.ts`.
+- **Sprint 3 (`9894693`):** Event CRUD (`/api/events`, `/api/events/mine`, `/api/events/[id]`, `/api/events/[id]/submit`), `/organizer/events/new`, `/organizer/events/[id]`, AI sponsorship package generator (`POST /api/ai/packages`) with Gemini/OpenAI structured JSON + clearly labeled deterministic fallback, interactive `PackageStudio` editor + DB persistence (`PUT /api/events/[id]/packages`), and `tests/sprint3-events-packages.test.ts` (3/3 pass).
+- **Sprint 4:** Sponsor Discovery (`/sponsor/discover`, `GET /api/events/discover` returning only `approved`/`published` events), Event Details (`/sponsor/events/[id]`), Deterministic 6-Factor Matcher (`lib/matching/scorer.ts`) + AI Explanations (`lib/ai/matching.ts`, `POST /api/ai/matches`, clearly distinguishing `ai_provider` vs. `deterministic_fallback`), AI Outreach Drafts (`POST /api/ai/outreach`), Organizer Matches (`/organizer/matches`), Proposal Lifecycle (`/organizer/proposals`, `/sponsor/proposals`, `POST /api/proposals`, `PATCH /api/proposals/[id]/respond`, migration `0003_sponsor_proposals.sql`), and `tests/sprint4-matching.test.ts` (3/3 pass; total 11/11).
 
-## 2. Currently Being Developed (Sprint 4)
-- Sponsor Discovery (`/sponsor/discover`, `GET /api/events/discover`), Event Details (`/sponsor/events/[id]`), Deterministic 6-Factor Matcher + AI Explanations (`POST /api/ai/matches`), Organizer Matches (`/organizer/matches`), and Proposal Lifecycle (`/organizer/proposals`, `/sponsor/proposals`, `POST /api/proposals`, `PATCH /api/proposals/[id]/respond`).
+## 2. Currently Being Developed (Sprint 5)
+- APIMatic PayPal Server SDK Context Plugin setup + `@paypal/paypal-server-sdk` Orders v2 server-side order creation/capture (`/api/paypal/orders`, `/api/paypal/capture`), PayPal Sandbox checkout (`/sponsor/payments/[id]`), and verified idempotent webhooks (`/api/paypal/webhook`).
 
 ## 3. Remaining Work
-- **Sprint 5:** APIMatic PayPal Context Plugin + `@paypal/paypal-server-sdk` Orders v2 create/capture + webhook signature verification.
 - **Sprint 6:** Deliverable fulfillment evidence (Supabase Storage) + AI performance reports.
 - **Sprint 7:** Responsive UI/UX polish, full security/RLS audit, automated & manual QA.
-- **Sprint 8:** Deployment, demo seeding, complete `README.md`, `LICENSE`, and 3-minute demo guide.
+- **Sprint 8:** Deployment, demo seeding, complete `README.md`, `LICENSE`, `CREDENTIALS_SETUP.md`, and 3-minute demo guide.
 
 ## 4. Integration Status
 | Integration | Status | Notes |

@@ -1,15 +1,11 @@
 import { NextRequest } from 'next/server';
 import { z } from 'zod';
-import type { OrderRequest } from '@paypal/paypal-server-sdk';
 import { requireApiSession } from '@/lib/auth/session';
 import { apiError, apiSuccess } from '@/lib/api/response';
 import { createAdminSupabaseClient } from '@/lib/supabase/admin';
-import {
-  CheckoutPaymentIntent,
-  createPayPalClient,
-  extractPayPalErrorInfo,
-} from '@/lib/paypal/client';
-import { canSponsorInitiateCheckout, minorToPayPalDecimal } from '@/lib/paypal/guards';
+import { CheckoutPaymentIntent, createPayPalClient } from '@/lib/paypal/client';
+import { canSponsorInitiateCheckout, type LocalPaymentLedgerCandidate } from '@/lib/paypal/guards';
+import { createOrReusePayPalOrder } from '@/lib/paypal/orders';
 
 const createOrderBodySchema = z.object({
   proposalId: z.string().uuid('Valid proposalId is required.'),
@@ -92,88 +88,145 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const valueDecimal = minorToPayPalDecimal(proposal.amount_minor, proposal.currency);
-  const tierLabel = proposal.sponsorship_packages?.name ?? 'Sponsorship';
-  const eventTitle = proposal.events?.title ?? 'University Event';
-  const description = `FestivalMint AI — ${tierLabel} for ${eventTitle}`.slice(0, 120);
-
   const abortController = new AbortController();
   const timeoutHandle = setTimeout(() => abortController.abort(), 15_000);
 
   try {
-    const orderBody: OrderRequest = {
-      intent: CheckoutPaymentIntent.Capture,
-      purchaseUnits: [
-        {
-          referenceId: proposal.id,
-          customId: proposal.id,
-          description,
-          amount: {
-            currencyCode: proposal.currency.toUpperCase(),
-            value: valueDecimal,
-          },
-        },
-      ],
-    };
-
-    const orderResponse = await paypal.ordersController.createOrder(
-      {
-        body: orderBody,
-        paypalRequestId: crypto.randomUUID(),
-        prefer: 'return=representation',
+    const outcome = await createOrReusePayPalOrder({
+      proposal: {
+        id: proposal.id,
+        sponsor_id: proposal.sponsor_id,
+        amount_minor: proposal.amount_minor,
+        currency: proposal.currency,
+        status: proposal.status,
+        eventTitle: proposal.events?.title ?? 'University Event',
+        packageName: proposal.sponsorship_packages?.name ?? 'Sponsorship',
       },
-      { abortSignal: abortController.signal }
-    );
+      currentSponsorId: sponsor.id,
+      actorUserId: context.userId,
+      deps: {
+        env: paypal.env,
+        findProposalPayments: async (proposalId) => {
+          const { data } = await adminDb
+            .from('payments')
+            .select('id, paypal_order_id, status, amount_minor, currency, created_at')
+            .eq('proposal_id', proposalId)
+            .order('created_at', { ascending: false })
+            .returns<LocalPaymentLedgerCandidate[]>();
+          return data ?? [];
+        },
+        updatePaymentStatus: async ({ paymentId, status, reason, captureId }) => {
+          await adminDb
+            .from('payments')
+            .update({
+              status,
+              raw_status_reason: reason,
+              ...(captureId ? { paypal_capture_id: captureId } : {}),
+            })
+            .eq('id', paymentId);
+        },
+        insertCreatedPayment: async ({
+          proposalId,
+          paypalOrderId,
+          amountMinor,
+          currency,
+          rawStatusReason,
+        }) => {
+          const { error: paymentErr } = await adminDb.from('payments').insert({
+            proposal_id: proposalId,
+            paypal_order_id: paypalOrderId,
+            amount_minor: amountMinor,
+            currency,
+            status: 'CREATED',
+            raw_status_reason: rawStatusReason,
+          });
+          if (paymentErr) {
+            if (paymentErr.code === '23505') {
+              return { ok: true, duplicateRace: true };
+            }
+            return { ok: false, message: paymentErr.message };
+          }
+          return { ok: true };
+        },
+        markProposalPaymentPending: async ({ proposalId, actorId, note }) => {
+          await adminDb
+            .from('proposals')
+            .update({ status: 'payment_pending' })
+            .eq('id', proposalId);
 
-    const order = orderResponse.result;
-    if (!order?.id) {
-      return apiError('PAYPAL_ORDER_FAILED', 'PayPal did not return an order ID.', 500);
-    }
-
-    const { error: paymentErr } = await adminDb.from('payments').insert({
-      proposal_id: proposal.id,
-      paypal_order_id: order.id,
-      amount_minor: proposal.amount_minor,
-      currency: proposal.currency.toUpperCase(),
-      status: 'CREATED',
-      raw_status_reason: order.status ?? 'CREATED',
+          await adminDb.from('proposal_events').insert({
+            proposal_id: proposalId,
+            actor_id: actorId,
+            event_type: 'payment_pending',
+            note,
+          });
+        },
+        getPayPalOrder: async (orderId) => {
+          const res = await paypal.ordersController.getOrder(
+            { id: orderId },
+            { abortSignal: abortController.signal }
+          );
+          const unit = res.result.purchaseUnits?.[0];
+          return {
+            id: res.result.id ?? orderId,
+            status: res.result.status ? String(res.result.status) : null,
+            amountValue: unit?.amount?.value ?? null,
+            currencyCode: unit?.amount?.currencyCode ?? null,
+            captures:
+              unit?.payments?.captures?.map((c) => ({
+                id: c.id ?? null,
+                status: c.status ? String(c.status) : null,
+              })) ?? [],
+          };
+        },
+        createPayPalOrder: async ({ proposalId, currency, valueDecimal, description, requestId }) => {
+          const orderResponse = await paypal.ordersController.createOrder(
+            {
+              body: {
+                intent: CheckoutPaymentIntent.Capture,
+                purchaseUnits: [
+                  {
+                    referenceId: proposalId,
+                    customId: proposalId,
+                    description,
+                    amount: {
+                      currencyCode: currency,
+                      value: valueDecimal,
+                    },
+                  },
+                ],
+              },
+              paypalRequestId: requestId,
+              prefer: 'return=representation',
+            },
+            { abortSignal: abortController.signal }
+          );
+          return {
+            id: orderResponse.result?.id ?? null,
+            status: orderResponse.result?.status ? String(orderResponse.result.status) : null,
+          };
+        },
+      },
     });
 
-    if (paymentErr) {
-      return apiError('PAYMENT_LEDGER_ERROR', paymentErr.message, 500);
-    }
-
-    if (proposal.status === 'accepted') {
-      await adminDb
-        .from('proposals')
-        .update({ status: 'payment_pending' })
-        .eq('id', proposal.id);
-
-      await adminDb.from('proposal_events').insert({
-        proposal_id: proposal.id,
-        actor_id: context.userId,
-        event_type: 'payment_pending',
-        note: `PayPal Sandbox Order ${order.id} created for ${valueDecimal} ${proposal.currency.toUpperCase()}.`,
-      });
+    if (!outcome.ok) {
+      return apiError(outcome.code, outcome.message, outcome.httpStatus);
     }
 
     return apiSuccess(
       {
-        orderId: order.id,
-        status: order.status ?? 'CREATED',
-        amountMinor: proposal.amount_minor,
-        currency: proposal.currency.toUpperCase(),
-        env: paypal.env,
+        orderId: outcome.orderId,
+        status: outcome.status,
+        amountMinor: outcome.amountMinor,
+        currency: outcome.currency,
+        env: outcome.env,
+        reused: outcome.reused,
       },
-      'PayPal Sandbox order created.',
-      201
+      outcome.reused
+        ? 'Reused active PayPal Sandbox order.'
+        : 'PayPal Sandbox order created.',
+      outcome.httpStatus
     );
-  } catch (err) {
-    const mapped = extractPayPalErrorInfo(err);
-    const fullMessage = mapped.debugId
-      ? `${mapped.message} (PayPal debug ID: ${mapped.debugId})`
-      : mapped.message;
-    return apiError(mapped.code, fullMessage, mapped.httpStatus);
   } finally {
     clearTimeout(timeoutHandle);
   }

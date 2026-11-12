@@ -166,6 +166,23 @@ export function getServerSupabaseServiceKey(): string {
   return isConfiguredValue(key) ? key : '';
 }
 
+export const DEFAULT_GEMINI_MODEL = 'gemini-3.1-flash-lite';
+
+export const GEMINI_FALLBACK_MODELS = [
+  'gemini-3.1-flash-lite',
+  'gemini-3.5-flash-lite',
+  'gemini-3.8-flash',
+  'gemini-3.6-flash',
+  'gemini-3.1-flash-lite-preview',
+  'gemini-3.5-flash',
+  'gemini-3-flash-preview',
+] as const;
+
+export function getGeminiCandidateModels(primaryModel?: string): string[] {
+  const trimmed = primaryModel?.trim() || DEFAULT_GEMINI_MODEL;
+  return [trimmed, ...GEMINI_FALLBACK_MODELS.filter((m) => m !== trimmed)];
+}
+
 export function getAiConfig() {
   const rawPreferred = readEnv('AI_PROVIDER').toLowerCase();
   const preferred = rawPreferred === 'openai' ? ('openai' as const) : ('gemini' as const);
@@ -193,7 +210,7 @@ export function getAiConfig() {
     return {
       provider: 'gemini' as const,
       apiKey: geminiKey,
-      model: readEnv('GEMINI_MODEL') || 'gemini-3-flash-preview',
+      model: readEnv('GEMINI_MODEL') || DEFAULT_GEMINI_MODEL,
     };
   }
   if (openaiKey) {
@@ -327,7 +344,7 @@ export function getDetailedIntegrationDiagnostics(): DetailedIntegrationDiagnost
       present: Boolean(rawGemini && !isPlaceholderValue(rawGemini)),
       structurallyValid: geminiValid,
       status: geminiStatus,
-      model: readEnv('GEMINI_MODEL') || 'gemini-3-flash-preview',
+      model: readEnv('GEMINI_MODEL') || DEFAULT_GEMINI_MODEL,
       externalAuth: 'not_verified',
       fullIntegration: 'not_verified',
     },

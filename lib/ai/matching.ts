@@ -40,7 +40,7 @@ Missing Info: ${match.missingInformation.join('; ') || 'None'}
     systemInstruction,
     userPrompt,
     schema: matchExplanationSchema,
-    timeoutMs: 12_000,
+    timeoutMs: 20_000,
   });
 
   if (aiOutcome.ok) {

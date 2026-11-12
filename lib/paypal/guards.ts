@@ -106,6 +106,119 @@ export function shouldProcessWebhookEvent(
   return true;
 }
 
+export const PAYPAL_ORDER_REUSE_MAX_AGE_MS = 2.5 * 60 * 60 * 1000;
+
+export interface LocalPaymentLedgerCandidate {
+  id: string;
+  paypal_order_id: string | null;
+  status: string;
+  amount_minor: number;
+  currency: string;
+  created_at: string;
+}
+
+export function isLocalPaymentRowReusable(
+  row: LocalPaymentLedgerCandidate,
+  expected: { amountMinor: number; currency: string },
+  nowMs = Date.now()
+): { reusable: true } | { reusable: false; reason: string } {
+  const status = row.status.toUpperCase();
+  if (status !== 'CREATED' && status !== 'APPROVED') {
+    return {
+      reusable: false,
+      reason: `Existing payment row is in "${row.status}" status.`,
+    };
+  }
+
+  if (!row.paypal_order_id || row.paypal_order_id.trim().length === 0) {
+    return {
+      reusable: false,
+      reason: 'Existing payment row is missing paypal_order_id.',
+    };
+  }
+
+  if (row.amount_minor !== expected.amountMinor) {
+    return {
+      reusable: false,
+      reason: `Locked amount changed (${row.amount_minor} != ${expected.amountMinor}).`,
+    };
+  }
+
+  if (row.currency.toUpperCase() !== expected.currency.toUpperCase()) {
+    return {
+      reusable: false,
+      reason: `Locked currency changed (${row.currency} != ${expected.currency}).`,
+    };
+  }
+
+  const createdMs = Date.parse(row.created_at);
+  if (!Number.isFinite(createdMs) || nowMs - createdMs > PAYPAL_ORDER_REUSE_MAX_AGE_MS) {
+    return {
+      reusable: false,
+      reason: 'Existing PayPal order exceeded safe reuse lifetime.',
+    };
+  }
+
+  return { reusable: true };
+}
+
+export function evaluateLivePayPalOrderForReuse(params: {
+  liveStatus?: string | null;
+  liveAmountValue?: string | null;
+  liveCurrencyCode?: string | null;
+  captures?: Array<{ id?: string | null; status?: string | null }> | null;
+  expectedAmountMinor: number;
+  expectedCurrency: string;
+}):
+  | { action: 'reuse'; orderStatus: string }
+  | { action: 'already_captured'; captureId: string | null; reason: string }
+  | { action: 'replace'; reason: string } {
+  const status = (params.liveStatus ?? '').toUpperCase();
+  const captures = params.captures ?? [];
+  const completedCapture = captures.find((c) => (c.status ?? '').toUpperCase() === 'COMPLETED');
+
+  if (status === 'COMPLETED' || completedCapture || captures.length > 0) {
+    return {
+      action: 'already_captured',
+      captureId: completedCapture?.id ?? captures[0]?.id ?? null,
+      reason: 'PayPal reports this order already has a capture/completed state.',
+    };
+  }
+
+  if (!['CREATED', 'APPROVED', 'PAYER_ACTION_REQUIRED'].includes(status)) {
+    return {
+      action: 'replace',
+      reason: `PayPal order status "${status || 'UNKNOWN'}" is no longer reusable.`,
+    };
+  }
+
+  const expectedCurr = params.expectedCurrency.toUpperCase();
+  const liveCurr = (params.liveCurrencyCode ?? '').toUpperCase();
+  if (!liveCurr || liveCurr !== expectedCurr || !params.liveAmountValue) {
+    return {
+      action: 'replace',
+      reason: `PayPal order currency/amount does not match locked ${expectedCurr} proposal.`,
+    };
+  }
+
+  try {
+    const liveMinor = payPalDecimalToMinor(params.liveAmountValue, expectedCurr);
+    if (liveMinor !== params.expectedAmountMinor) {
+      return {
+        action: 'replace',
+        reason: `PayPal order amount ${liveMinor} differs from proposal amount ${params.expectedAmountMinor}.`,
+      };
+    }
+  } catch {
+    return {
+      action: 'replace',
+      reason: 'PayPal order returned an invalid amount value.',
+    };
+  }
+
+  return { action: 'reuse', orderStatus: status };
+}
+
 export function buildDeliverablesFromPackageSnapshot(params: {
   proposalId: string;
   benefitsSnapshot: unknown;

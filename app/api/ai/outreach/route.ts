@@ -65,7 +65,7 @@ Proposed Package: ${sanitizeForPrompt(pkg.name, 80)} (${formatMinorCurrency(pkg.
 Deliverables: ${(pkg.benefits_json as string[]).join('; ')}
 </untrusted_data>`,
     schema: draftResponseSchema,
-    timeoutMs: 12_000,
+    timeoutMs: 20_000,
   });
 
   if (aiOutcome.ok) {

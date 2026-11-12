@@ -13,6 +13,7 @@ import { createClient } from '@supabase/supabase-js';
 import {
   getAiConfig,
   getDetailedIntegrationDiagnostics,
+  getGeminiCandidateModels,
   getPublicSupabaseEnv,
   getServerSupabaseServiceKey,
 } from '@/lib/env';
@@ -87,18 +88,13 @@ async function runLiveChecks(diag) {
   // 2. Live Gemini check
   const aiCfg = getAiConfig();
   if (aiCfg && aiCfg.provider === 'gemini') {
-    const candidateModels = [
-      aiCfg.model,
-      ...['gemini-3-flash-preview', 'gemini-3.1-flash-lite-preview'].filter(
-        (m) => m !== aiCfg.model
-      ),
-    ];
-    try {
-      let verified = false;
-      for (const candidateModel of candidateModels) {
-        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(
-          candidateModel
-        )}:generateContent?key=${encodeURIComponent(aiCfg.apiKey)}`;
+    const candidateModels = getGeminiCandidateModels(aiCfg.model);
+    let verified = false;
+    for (const candidateModel of candidateModels) {
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(
+        candidateModel
+      )}:generateContent?key=${encodeURIComponent(aiCfg.apiKey)}`;
+      try {
         const res = await fetch(endpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -106,7 +102,7 @@ async function runLiveChecks(diag) {
             contents: [{ role: 'user', parts: [{ text: 'Return JSON: {"ok":true}' }] }],
             generationConfig: { responseMimeType: 'application/json' },
           }),
-          signal: AbortSignal.timeout(10_000),
+          signal: AbortSignal.timeout(7_000),
         });
         if (res.ok) {
           diag.gemini.externalAuth = 'verified';
@@ -115,14 +111,15 @@ async function runLiveChecks(diag) {
           verified = true;
           break;
         }
-        if (res.status !== 404) {
+        if (res.status !== 404 && res.status !== 429 && res.status !== 503) {
           break;
         }
+      } catch {
+        // Per-model timeout/network glitch: try next healthy candidate model.
+        continue;
       }
-      if (!verified) {
-        diag.gemini.externalAuth = 'failed';
-      }
-    } catch {
+    }
+    if (!verified) {
       diag.gemini.externalAuth = 'failed';
     }
   }

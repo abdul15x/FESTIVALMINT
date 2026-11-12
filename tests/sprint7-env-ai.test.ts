@@ -163,12 +163,79 @@ test('generateStructuredJson maps Gemini 429 rate limits, 401 auth errors, timeo
       assert.equal(fallbackRes.ok, true);
       if (fallbackRes.ok) {
         assert.equal(fallbackRes.data.okLabel, 'fallback_ok');
-        assert.equal(fallbackRes.model, 'gemini-3-flash-preview');
+        assert.equal(fallbackRes.model, 'gemini-3.1-flash-lite');
       }
       assert.equal(requestedUrls.length, 2);
     } finally {
       if (prevModel === undefined) delete process.env.GEMINI_MODEL;
       else process.env.GEMINI_MODEL = prevModel;
+    }
+
+    // 429 per-model quota fallback check
+    const quotaUrls: string[] = [];
+    globalThis.fetch = (async (input: RequestInfo | URL) => {
+      const url = typeof input === 'string' ? input : input.toString();
+      quotaUrls.push(url);
+      if (quotaUrls.length === 1) {
+        return new Response(JSON.stringify({ error: { code: 429, message: 'quota exceeded' } }), {
+          status: 429,
+        });
+      }
+      return new Response(
+        JSON.stringify({ candidates: [{ content: { parts: [{ text: '{"okLabel":"quota_fallback_ok"}' }] } }] }),
+        { status: 200 }
+      );
+    }) as typeof fetch;
+    const prevModelQuota = process.env.GEMINI_MODEL;
+    process.env.GEMINI_MODEL = 'gemini-3-flash-preview';
+    try {
+      const quotaFallbackRes = await generateStructuredJson({
+        systemInstruction: 'sys',
+        userPrompt: 'usr',
+        schema: testSchema,
+      });
+      assert.equal(quotaFallbackRes.ok, true);
+      if (quotaFallbackRes.ok) {
+        assert.equal(quotaFallbackRes.data.okLabel, 'quota_fallback_ok');
+        assert.equal(quotaFallbackRes.model, 'gemini-3.1-flash-lite');
+      }
+      assert.equal(quotaUrls.length, 2);
+    } finally {
+      if (prevModelQuota === undefined) delete process.env.GEMINI_MODEL;
+      else process.env.GEMINI_MODEL = prevModelQuota;
+    }
+
+    // Per-model timeout fallback check
+    let timeoutCalls = 0;
+    globalThis.fetch = (async () => {
+      timeoutCalls += 1;
+      if (timeoutCalls === 1) {
+        const err = new Error('model stalled');
+        err.name = 'AbortError';
+        throw err;
+      }
+      return new Response(
+        JSON.stringify({ candidates: [{ content: { parts: [{ text: '{"okLabel":"timeout_recovered"}' }] } }] }),
+        { status: 200 }
+      );
+    }) as typeof fetch;
+    const prevTimeoutModel = process.env.GEMINI_MODEL;
+    process.env.GEMINI_MODEL = 'gemini-3.5-flash';
+    try {
+      const timeoutRecovered = await generateStructuredJson({
+        systemInstruction: 'sys',
+        userPrompt: 'usr',
+        schema: testSchema,
+      });
+      assert.equal(timeoutRecovered.ok, true);
+      if (timeoutRecovered.ok) {
+        assert.equal(timeoutRecovered.data.okLabel, 'timeout_recovered');
+        assert.equal(timeoutRecovered.model, 'gemini-3.1-flash-lite');
+      }
+      assert.equal(timeoutCalls, 2);
+    } finally {
+      if (prevTimeoutModel === undefined) delete process.env.GEMINI_MODEL;
+      else process.env.GEMINI_MODEL = prevTimeoutModel;
     }
 
     // Valid structured JSON check

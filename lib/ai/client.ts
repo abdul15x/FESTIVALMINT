@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { getAiConfig } from '@/lib/env';
+import { getAiConfig, getGeminiCandidateModels } from '@/lib/env';
 
 const rateBuckets = new Map<string, { count: number; resetAt: number }>();
 
@@ -65,58 +65,90 @@ export async function generateStructuredJson<T>(options: {
     };
   }
 
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), options.timeoutMs ?? 20_000);
+  const totalTimeoutMs = options.timeoutMs ?? 20_000;
+  const deadlineMs = Date.now() + totalTimeoutMs;
 
   try {
     let rawText = '';
     let activeModel = config.model;
 
     if (config.provider === 'gemini') {
-      const candidateModels = [
-        config.model,
-        ...['gemini-3-flash-preview', 'gemini-3.1-flash-lite-preview'].filter(
-          (m) => m !== config.model
-        ),
-      ];
+      const candidateModels = getGeminiCandidateModels(config.model);
 
       let lastRes: Response | null = null;
-      for (const candidateModel of candidateModels) {
+      let sawTimeout = false;
+
+      for (let i = 0; i < candidateModels.length; i++) {
+        const remainingMs = deadlineMs - Date.now();
+        if (remainingMs <= 0) {
+          sawTimeout = true;
+          break;
+        }
+
+        const candidateModel = candidateModels[i];
         activeModel = candidateModel;
         const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(
           candidateModel
         )}:generateContent?key=${encodeURIComponent(config.apiKey)}`;
 
-        const res = await fetch(endpoint, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          signal: controller.signal,
-          body: JSON.stringify({
-            systemInstruction: {
-              parts: [{ text: options.systemInstruction }],
-            },
-            contents: [
-              {
-                role: 'user',
-                parts: [{ text: options.userPrompt }],
-              },
-            ],
-            generationConfig: {
-              temperature: 0.25,
-              responseMimeType: 'application/json',
-            },
-          }),
-        });
+        // Cap each fallback attempt so one stalled model leaves budget for healthy fallbacks.
+        const attemptMs =
+          i < candidateModels.length - 1 ? Math.min(10_000, remainingMs) : remainingMs;
+        const attemptController = new AbortController();
+        const attemptTimer = setTimeout(() => attemptController.abort(), attemptMs);
 
-        lastRes = res;
-        if (res.status === 404) {
-          continue;
+        try {
+          const res = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            signal: attemptController.signal,
+            body: JSON.stringify({
+              systemInstruction: {
+                parts: [{ text: options.systemInstruction }],
+              },
+              contents: [
+                {
+                  role: 'user',
+                  parts: [{ text: options.userPrompt }],
+                },
+              ],
+              generationConfig: {
+                temperature: 0.25,
+                responseMimeType: 'application/json',
+              },
+            }),
+          });
+
+          lastRes = res;
+          // Try next available Gemini model when current model is removed (404),
+          // quota-exhausted (429), or temporarily overloaded (503).
+          if (res.status === 404 || res.status === 429 || res.status === 503) {
+            continue;
+          }
+          break;
+        } catch (attemptErr) {
+          if (attemptErr instanceof Error && attemptErr.name === 'AbortError') {
+            sawTimeout = true;
+            continue;
+          }
+          throw attemptErr;
+        } finally {
+          clearTimeout(attemptTimer);
         }
-        break;
       }
 
-      if (!lastRes || !lastRes.ok) {
-        const status = lastRes?.status ?? 500;
+      if (!lastRes) {
+        return {
+          ok: false,
+          reason: sawTimeout ? 'timeout' : 'provider_error',
+          message: sawTimeout
+            ? 'AI request timed out.'
+            : 'Failed to reach any configured Gemini model.',
+        };
+      }
+
+      if (!lastRes.ok) {
+        const status = lastRes.status;
         const reason =
           status === 429
             ? 'rate_limited'
@@ -135,23 +167,30 @@ export async function generateStructuredJson<T>(options: {
       };
       rawText = payload.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
     } else {
-      const res = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${config.apiKey}`,
-        },
-        signal: controller.signal,
-        body: JSON.stringify({
-          model: config.model,
-          temperature: 0.25,
-          response_format: { type: 'json_object' },
-          messages: [
-            { role: 'system', content: options.systemInstruction },
-            { role: 'user', content: options.userPrompt },
-          ],
-        }),
-      });
+      const openaiController = new AbortController();
+      const openaiTimer = setTimeout(() => openaiController.abort(), totalTimeoutMs);
+      let res: Response;
+      try {
+        res = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${config.apiKey}`,
+          },
+          signal: openaiController.signal,
+          body: JSON.stringify({
+            model: config.model,
+            temperature: 0.25,
+            response_format: { type: 'json_object' },
+            messages: [
+              { role: 'system', content: options.systemInstruction },
+              { role: 'user', content: options.userPrompt },
+            ],
+          }),
+        });
+      } finally {
+        clearTimeout(openaiTimer);
+      }
 
       if (!res.ok) {
         const reason =
@@ -202,7 +241,5 @@ export async function generateStructuredJson<T>(options: {
       reason: 'provider_error',
       message: 'Failed to parse or retrieve structured AI response.',
     };
-  } finally {
-    clearTimeout(timer);
   }
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { PayPalButtons, PayPalScriptProvider } from '@paypal/react-paypal-js';
@@ -43,6 +43,10 @@ export function PayPalCheckoutClient({
   const [payment, setPayment] = useState<ExistingPaymentInfo | null>(existingPayment);
   const [error, setError] = useState<string | null>(null);
   const [processingMessage, setProcessingMessage] = useState<string | null>(null);
+  const [isCapturing, setIsCapturing] = useState(false);
+
+  const createOrderPromiseRef = useRef<Promise<string> | null>(null);
+  const captureInFlightRef = useRef(false);
 
   const isPaid = status === 'paid' || payment?.status === 'COMPLETED';
   const eligibleForCheckout = ['accepted', 'payment_pending'].includes(status);
@@ -164,52 +168,90 @@ export function PayPalCheckoutClient({
                 }}
               >
                 <PayPalButtons
+                  disabled={isCapturing}
                   style={{ layout: 'vertical', shape: 'rect', label: 'pay' }}
                   createOrder={async () => {
-                    setError(null);
-                    setProcessingMessage('Creating server-verified PayPal Sandbox order...');
-                    const res = await fetch('/api/paypal/orders', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ proposalId }),
-                    });
-                    const json = await res.json();
-                    if (!res.ok || !json.data?.orderId) {
-                      setProcessingMessage(null);
-                      const msg = json.message ?? 'Could not create PayPal Sandbox order.';
-                      setError(msg);
-                      throw new Error(msg);
+                    if (isPaid || !eligibleForCheckout) {
+                      throw new Error('Proposal is not eligible for PayPal checkout.');
                     }
-                    setProcessingMessage(null);
-                    return json.data.orderId as string;
+                    if (createOrderPromiseRef.current) {
+                      return createOrderPromiseRef.current;
+                    }
+
+                    setError(null);
+                    setProcessingMessage('Verifying or preparing PayPal Sandbox order...');
+
+                    const orderPromise = (async () => {
+                      const res = await fetch('/api/paypal/orders', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ proposalId }),
+                      });
+                      const json = await res.json();
+                      if (!res.ok || !json.data?.orderId) {
+                        const msg = json.message ?? 'Could not create PayPal Sandbox order.';
+                        setError(msg);
+                        throw new Error(msg);
+                      }
+                      const orderId = json.data.orderId as string;
+                      setPayment((prev) => ({
+                        id: prev?.id ?? orderId,
+                        paypal_order_id: orderId,
+                        paypal_capture_id: prev?.paypal_capture_id ?? null,
+                        amount_minor: prev?.amount_minor ?? amountMinor,
+                        currency: prev?.currency ?? currency,
+                        status: (json.data.status as string | undefined) ?? 'CREATED',
+                        captured_at: prev?.captured_at ?? null,
+                      }));
+                      return orderId;
+                    })().finally(() => {
+                      createOrderPromiseRef.current = null;
+                      setProcessingMessage(null);
+                    });
+
+                    createOrderPromiseRef.current = orderPromise;
+                    return orderPromise;
                   }}
                   onApprove={async (data) => {
+                    if (captureInFlightRef.current) return;
+                    captureInFlightRef.current = true;
+                    setIsCapturing(true);
                     setError(null);
                     setProcessingMessage('Capturing and verifying payment on server...');
-                    const res = await fetch('/api/paypal/capture', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({
-                        proposalId,
-                        orderId: data.orderID,
-                      }),
-                    });
-                    const json = await res.json();
-                    if (!res.ok) {
+                    try {
+                      const res = await fetch('/api/paypal/capture', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                          proposalId,
+                          orderId: data.orderID,
+                        }),
+                      });
+                      const json = await res.json();
+                      if (!res.ok) {
+                        setError(json.message ?? 'Server capture verification failed.');
+                        return;
+                      }
+                      setPayment(json.data.payment ?? null);
+                      setStatus('paid');
+                      router.refresh();
+                    } finally {
+                      captureInFlightRef.current = false;
+                      setIsCapturing(false);
                       setProcessingMessage(null);
-                      setError(json.message ?? 'Server capture verification failed.');
-                      return;
                     }
-                    setPayment(json.data.payment ?? null);
-                    setStatus('paid');
-                    setProcessingMessage(null);
-                    router.refresh();
                   }}
                   onCancel={() => {
+                    createOrderPromiseRef.current = null;
+                    captureInFlightRef.current = false;
+                    setIsCapturing(false);
                     setProcessingMessage(null);
                     setError('PayPal checkout was cancelled before capture. No funds were captured.');
                   }}
                   onError={(err) => {
+                    createOrderPromiseRef.current = null;
+                    captureInFlightRef.current = false;
+                    setIsCapturing(false);
                     setProcessingMessage(null);
                     setError(
                       err instanceof Error

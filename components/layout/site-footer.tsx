@@ -92,7 +92,7 @@ export function SiteFooter() {
           </div>
         </div>
 
-        <div className="mt-12 flex flex-col items-start justify-between gap-3 border-t border-white/10 pt-6 text-xs text-slate-500 sm:flex-row sm:items-center">
+        <div className="mt-12 flex flex-col items-start justify-between gap-3 border-t border-white/10 pt-6 text-xs text-slate-300 sm:flex-row sm:items-center">
           <p className="font-mono">FESTIVALMINT AI · University Sponsorship Exchange</p>
           <p>Structured packages · Transparent compatibility · PayPal Sandbox · Proof Vault</p>
         </div>

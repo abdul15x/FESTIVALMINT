@@ -5,7 +5,6 @@ import { DashboardShell } from '@/components/layout/dashboard-shell';
 import { requirePageSession } from '@/lib/auth/session';
 import { createAdminSupabaseClient } from '@/lib/supabase/admin';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
 import { buttonClasses } from '@/components/ui/button';
 import { formatMinorCurrency, formatShortDate } from '@/lib/utils';
 import {
@@ -133,13 +132,13 @@ export default async function OrganizerProposalReportPage({
           </Badge>
         </div>
 
-        <Card className="border-stone-200/90 bg-[#0c121e] text-white bg-ledger-grid-dark">
-          <CardContent className="flex flex-wrap items-center justify-between gap-4 p-6">
+        <div className="overflow-hidden rounded-2xl border border-[#0c121e] bg-[#0c121e] text-white ledger-grid-dark shadow-[0_1px_2px_rgba(12,18,30,0.06),0_8px_20px_-6px_rgba(12,18,30,0.18)]">
+          <div className="flex flex-wrap items-center justify-between gap-4 p-5 sm:p-6">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-emerald-400">
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-emerald-400">
                 Organizer Fulfillment Ledger
               </p>
-              <h1 className="mt-1 font-display text-2xl font-bold">
+              <h1 className="mt-1 font-display text-2xl font-bold text-white">
                 Deliverable Proof &amp; Performance Report
               </h1>
               <p className="mt-1.5 text-sm text-slate-300">
@@ -150,15 +149,15 @@ export default async function OrganizerProposalReportPage({
               </p>
             </div>
             <div className="rounded-2xl border border-white/15 bg-white/5 px-4 py-3 text-right">
-              <p className="text-xs font-medium text-slate-400">
+              <p className="text-xs font-medium text-slate-300">
                 Settled Package Value
               </p>
               <p className="mt-0.5 font-mono text-2xl font-semibold text-emerald-400 tabular-nums">
                 {formatMinorCurrency(proposal.amount_minor, proposal.currency)}
               </p>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         <FulfillmentReportClient
           proposalId={proposal.id}

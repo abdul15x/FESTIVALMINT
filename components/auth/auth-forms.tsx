@@ -216,7 +216,7 @@ export function SignUpForm({
                     )}
                   />
                   <span className="mt-2 font-display text-xs font-bold">{item.title}</span>
-                  <span className="mt-0.5 text-[11px] text-stone-500">{item.sub}</span>
+                  <span className="mt-0.5 text-xs text-stone-600">{item.sub}</span>
                 </span>
               </button>
             );

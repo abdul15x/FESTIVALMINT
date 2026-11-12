@@ -119,7 +119,7 @@ export default async function SponsorDashboardPage() {
                     <div>
                       <div className="flex items-center justify-between gap-2">
                         <Badge variant="mint">{ev.category}</Badge>
-                        {ev.is_demo && <span className="text-[11px] text-slate-400">Demo</span>}
+                        {ev.is_demo && <span className="text-xs font-medium text-stone-600">Demo</span>}
                       </div>
                       <h3 className="mt-2 font-semibold text-slate-950">{ev.title}</h3>
                       <p className="mt-1 text-xs text-slate-600">

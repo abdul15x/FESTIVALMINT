@@ -41,12 +41,12 @@ export function BrandLogo({ href = '/', compact = false, dark = false }: BrandLo
             )}
           >
             FESTIVALMINT{' '}
-            <span className={dark ? 'text-emerald-400' : 'text-emerald-600'}>AI</span>
+            <span className={dark ? 'text-emerald-400' : 'text-emerald-700'}>AI</span>
           </span>
           <span
             className={cn(
               'mt-0.5 text-[11px] font-medium tracking-wide',
-              dark ? 'text-slate-400' : 'text-stone-500'
+              dark ? 'text-slate-300' : 'text-stone-600'
             )}
           >
             Campus Exchange

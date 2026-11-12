@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input, Label, Select, Textarea } from '@/components/ui/input';
@@ -36,7 +35,6 @@ export function OrganizerOnboardingForm({
   defaultContactName: string;
   defaultEmail: string;
 }) {
-  const router = useRouter();
   const [societyName, setSocietyName] = useState('');
   const [universityName, setUniversityName] = useState('');
   const [campusCity, setCampusCity] = useState('');
@@ -72,8 +70,7 @@ export function OrganizerOnboardingForm({
         setError(json.message ?? 'Could not save organizer profile.');
         return;
       }
-      router.push(json.data.redirectTo || '/organizer/dashboard');
-      router.refresh();
+      window.location.assign(json.data.redirectTo || '/organizer/dashboard');
     } catch {
       setError('Network error saving profile.');
     } finally {
@@ -206,7 +203,6 @@ export function OrganizerOnboardingForm({
 }
 
 export function SponsorOnboardingForm({ defaultEmail }: { defaultEmail: string }) {
-  const router = useRouter();
   const [companyName, setCompanyName] = useState('');
   const [industry, setIndustry] = useState('');
   const [description, setDescription] = useState('');
@@ -262,8 +258,7 @@ export function SponsorOnboardingForm({ defaultEmail }: { defaultEmail: string }
         setError(json.message ?? 'Could not save sponsor profile.');
         return;
       }
-      router.push(json.data.redirectTo || '/sponsor/dashboard');
-      router.refresh();
+      window.location.assign(json.data.redirectTo || '/sponsor/dashboard');
     } catch {
       setError('Network error saving profile.');
     } finally {

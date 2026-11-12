@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Building2, GraduationCap, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -16,7 +15,6 @@ export function SignInForm({
   supabaseConfigured: boolean;
   initialError?: string;
 }) {
-  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -41,8 +39,7 @@ export function SignInForm({
         setError(json.message ?? 'Sign in failed. Please check your credentials.');
         return;
       }
-      router.push(json.data.redirectTo || '/organizer/dashboard');
-      router.refresh();
+      window.location.assign(json.data.redirectTo || '/organizer/dashboard');
     } catch {
       setError('Network error while signing in. Please try again.');
     } finally {
@@ -115,7 +112,6 @@ export function SignUpForm({
   defaultRole?: 'organizer' | 'sponsor';
   supabaseConfigured: boolean;
 }) {
-  const router = useRouter();
   const [role, setRole] = useState<'organizer' | 'sponsor'>(defaultRole);
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
@@ -146,8 +142,7 @@ export function SignUpForm({
         return;
       }
 
-      router.push(json.data?.redirectTo || '/onboarding');
-      router.refresh();
+      window.location.assign(json.data?.redirectTo || '/onboarding');
     } catch {
       setError('Network error while creating your account.');
     } finally {

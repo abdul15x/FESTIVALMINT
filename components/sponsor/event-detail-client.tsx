@@ -243,6 +243,7 @@ export function SponsorEventDetailClient({
                       package price before PayPal Sandbox payment.
                     </p>
                     <Button
+                      className="w-full whitespace-normal text-center sm:w-auto sm:whitespace-nowrap"
                       disabled={!selectedPkgId || submitting}
                       onClick={selectPackageForCheckout}
                     >

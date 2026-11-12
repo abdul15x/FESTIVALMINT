@@ -516,6 +516,7 @@ export default function LandingPage() {
                       <span className="font-medium text-slate-500">{ev.startingTier}</span>
                       <Link
                         href={`/sponsor/events/${ev.id}`}
+                        prefetch={false}
                         className="inline-flex items-center gap-1 font-semibold text-emerald-700 hover:underline"
                       >
                         Inspect Event

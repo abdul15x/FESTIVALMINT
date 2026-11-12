@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard,
   CalendarPlus,
@@ -63,7 +63,6 @@ export function DashboardShell({
   children,
 }: DashboardShellProps) {
   const pathname = usePathname();
-  const router = useRouter();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
   const items = ROLE_NAV[role];
@@ -76,8 +75,7 @@ export function DashboardShell({
     try {
       await fetch('/api/auth/sign-out', { method: 'POST' });
     } finally {
-      router.push('/auth/sign-in');
-      router.refresh();
+      window.location.replace('/auth/sign-in');
     }
   }
 

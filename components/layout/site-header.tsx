@@ -24,7 +24,7 @@ export function SiteHeader() {
           <Link href="/#demo-events" className="hover:text-slate-950 transition-colors">
             Explore Events
           </Link>
-          <Link href="/sponsor/discover" className="hover:text-slate-950 transition-colors">
+          <Link href="/sponsor/discover" prefetch={false} className="hover:text-slate-950 transition-colors">
             Sponsor Portal
           </Link>
         </nav>
@@ -76,6 +76,7 @@ export function SiteHeader() {
             </Link>
             <Link
               href="/sponsor/discover"
+              prefetch={false}
               onClick={() => setMobileOpen(false)}
               className="rounded-lg px-2 py-1.5 hover:bg-slate-50"
             >

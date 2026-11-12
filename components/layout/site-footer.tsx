@@ -20,12 +20,12 @@ export function SiteFooter() {
               <p className="font-semibold text-white">Marketplace</p>
               <ul className="mt-3 space-y-2 text-slate-400">
                 <li>
-                  <Link href="/organizer/dashboard" className="hover:text-emerald-400">
+                  <Link href="/organizer/dashboard" prefetch={false} className="hover:text-emerald-400">
                     Organizer Portal
                   </Link>
                 </li>
                 <li>
-                  <Link href="/sponsor/discover" className="hover:text-emerald-400">
+                  <Link href="/sponsor/discover" prefetch={false} className="hover:text-emerald-400">
                     Sponsor Discovery
                   </Link>
                 </li>
@@ -55,7 +55,7 @@ export function SiteFooter() {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/admin/dashboard" className="hover:text-emerald-400">
+                  <Link href="/admin/dashboard" prefetch={false} className="hover:text-emerald-400">
                     Campus Governance
                   </Link>
                 </li>

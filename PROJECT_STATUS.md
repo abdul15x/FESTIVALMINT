@@ -1,7 +1,7 @@
 # FESTIVALMINT AI — Project Status Tracker
 
-> **Current Phase:** Sprint 7 Complete → Starting Sprint 8 (Documentation, Seed/Demo & Deployment Readiness)  
-> **Overall Status:** Active Autonomous Execution (Sprints 2–8)  
+> **Current Phase:** Sprint 8 Complete (All 8 Sprints Delivered — Awaiting User Credentials for Live Cloud Run)  
+> **Overall Status:** Ready for Credentials, Remote Migration/Seeding, and Deployment  
 
 ---
 
@@ -12,13 +12,14 @@
 - **Sprint 4 (`8efd366`):** Sponsor Discovery (`/sponsor/discover`, `GET /api/events/discover`), Event Details (`/sponsor/events/[id]`), Deterministic 6-Factor Matcher (`lib/matching/scorer.ts`) + AI Explanations (`lib/ai/matching.ts`, `POST /api/ai/matches`), AI Outreach Drafts (`POST /api/ai/outreach`), Organizer Matches (`/organizer/matches`), Proposal Lifecycle (`/organizer/proposals`, `/sponsor/proposals`, `POST /api/proposals`, `PATCH /api/proposals/[id]/respond`, migration `0003_sponsor_proposals.sql`), and `tests/sprint4-matching.test.ts` (3/3 pass).
 - **Sprint 5 (`e7bcbe1`):** APIMatic `paypal` Context Plugin + `@paypal/paypal-server-sdk@2.5.0` & `@paypal/react-paypal-js`, Orders v2 server-side create/capture (`/api/paypal/orders`, `/api/paypal/capture`), verified idempotent webhooks (`/api/paypal/webhook`), Sponsor Checkout UI (`/sponsor/payments/[id]`), and `tests/sprint5-paypal.test.ts` (4/4 pass).
 - **Sprint 6 (`de299c9`):** Private Supabase Storage `evidence` bucket migration (`supabase/migrations/0004_storage_bucket.sql`), MIME/extension/10MB validation (`lib/validation/evidence.ts`), file + external URL/notes upload & sponsor deliverable review API (`POST`/`PATCH /api/evidence`), evidence-grounded AI Sponsorship Performance Report engine (`lib/ai/reports.ts`, `POST /api/ai/reports`) explicitly separating Verified Facts, Organizer Claims, Analytical Observations, and Missing Deliverables, shared Organizer & Sponsor report pages (`/organizer/reports/[id]`, `/sponsor/reports/[id]`), sanitized `.env.example` placeholders, and `tests/sprint6-evidence.test.ts` (3/3 pass; total 18/18).
-- **Sprint 7:** Audited client components & server routes for zero secret leakage and zero remaining `SprintShellCard` stubs, added direct dashboard links to `/organizer/reports/[id]`, `/sponsor/payments/[id]`, and `/sponsor/reports/[id]`, updated `TESTING.md` with exact passing suite matrix, and verified 11 live HTTP routes on production `next start -p 3015` (`GET /` `200`, `GET /api/health` `200`, protected dashboards `307`, APIs `503`/`400` without crashes).
+- **Sprint 7 (`4253b13`):** Audited client components & server routes for zero secret leakage and zero remaining `SprintShellCard` stubs, added direct dashboard links to `/organizer/reports/[id]`, `/sponsor/payments/[id]`, and `/sponsor/reports/[id]`, updated `TESTING.md` with exact passing suite matrix, and verified 11 live HTTP routes on production `next start -p 3015` (`GET /` `200`, `GET /api/health` `200`, protected dashboards `307`, APIs `503`/`400` without crashes).
+- **Sprint 8:** Authored comprehensive 15-section `README.md` (covering architecture, APIMatic context plugin usage, PayPal Sandbox scope, AI fallback transparency, demo script, and deployment), `CREDENTIALS_SETUP.md`, and MIT `LICENSE`.
 
-## 2. Currently Being Developed (Sprint 8)
-- Final `README.md` (all 18 sections), `LICENSE`, `CREDENTIALS_SETUP.md`, deployment readiness, and clean final verification.
+## 2. Currently Being Developed
+- All P0 and P1 implementation sprints (Sprints 1–8) are complete in code and passing local verification (`tsc --noEmit`, `eslint`, `npm test` 18/18, `next build` 39 routes).
 
-## 3. Remaining Work
-- Live remote Supabase / AI / PayPal Sandbox integration smoke run once `.env.local` credentials are supplied by the user.
+## 3. Remaining Work (Requires User Environment Credentials)
+- Populate `.env.local` per [CREDENTIALS_SETUP.md](./CREDENTIALS_SETUP.md), execute SQL migrations `0001`–`0004` + `supabase/seed.sql` + `node scripts/seed-demo.mjs`, and deploy to Vercel/Render.
 
 ## 4. Integration Status
 | Integration | Status | Notes |

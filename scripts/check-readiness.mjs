@@ -60,12 +60,21 @@ async function runLiveChecks(diag) {
         diag.supabasePublic.externalAuth = 'verified';
         diag.supabaseServer.externalAuth = 'verified';
 
-        const [{ error: tblErr }, { data: buckets }] = await Promise.all([
-          adminDb.from('events').select('id', { count: 'exact', head: true }),
-          adminDb.storage.listBuckets(),
-        ]);
+        const [profilesRes, eventsRes, proposalsRes, paymentsRes, { data: buckets }] =
+          await Promise.all([
+            adminDb.from('profiles').select('id').limit(1),
+            adminDb.from('events').select('id').limit(1),
+            adminDb.from('proposals').select('id').limit(1),
+            adminDb.from('payments').select('id').limit(1),
+            adminDb.storage.listBuckets(),
+          ]);
+        const hasCoreTables =
+          !profilesRes.error &&
+          !eventsRes.error &&
+          !proposalsRes.error &&
+          !paymentsRes.error;
         const hasEvidenceBucket = Boolean(buckets?.some((b) => b.id === 'evidence' && !b.public));
-        if (!tblErr && hasEvidenceBucket) {
+        if (hasCoreTables && hasEvidenceBucket) {
           diag.supabasePublic.fullIntegration = 'verified';
           diag.supabaseServer.fullIntegration = 'verified';
         }

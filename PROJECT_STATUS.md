@@ -16,21 +16,22 @@
 - **Sprint 8:** Authored comprehensive 15-section `README.md` (covering architecture, APIMatic context plugin usage, PayPal Sandbox scope, AI fallback transparency, demo script, and deployment), `CREDENTIALS_SETUP.md`, and MIT `LICENSE`.
 
 ## 2. Currently Being Developed
-- All P0 and P1 implementation sprints (Sprints 1–8) are complete in code and passing local verification (`tsc --noEmit`, `eslint`, `npm test` 20/20, `next build` 39 routes).
+- All P0 and P1 implementation sprints (Sprints 1–8) are complete in code and passing local verification (`tsc --noEmit`, `eslint`, `npm test` 22/22, `next build` 39 routes).
+- Prepared one-shot `supabase/combined_setup.sql` (migrations `0001`–`0004` + `seed.sql`) and hardened `lib/env.ts` to reject template placeholder strings.
 
 ## 3. Remaining Work (Requires User Environment Credentials)
-- Populate `.env.local` per [CREDENTIALS_SETUP.md](./CREDENTIALS_SETUP.md), execute SQL migrations `0001`–`0004` + `supabase/seed.sql` + `node scripts/seed-demo.mjs`, and deploy to Vercel/Render.
+- Update `.env.local` per [CREDENTIALS_SETUP.md](./CREDENTIALS_SETUP.md) with real Supabase URL/keys (replacing template placeholders), a Gemini API key (`GEMINI_API_KEY`), and valid PayPal **Sandbox** App credentials (existing `.env.local` PayPal keys returned `401 Client Authentication failed` on Sandbox) + `PAYPAL_WEBHOOK_ID`, then execute `supabase/combined_setup.sql` + `node scripts/seed-demo.mjs`.
 
 ## 4. Integration Status
 | Integration | Status | Notes |
 |---|---|---|
-| Next.js / TypeScript Foundation | Verified | `typecheck`, `lint`, `test` (20/20), and `next build` (39 routes) pass |
-| Database Schema & RLS SQL | Authored (Remote Apply Pending) | Migrations `0001`–`0004` & `scripts/seed-demo.mjs` ready; awaiting `.env.local` |
-| Authentication (Supabase Auth) | Implemented (Live Test Pending Keys) | Auth APIs, UI, `proxy.ts`, and RBAC guards verified via build/unit tests |
-| AI Provider (Gemini / OpenAI) | Implemented + Deterministic Fallback | Structured JSON package, match explanation, outreach, & report layers ready |
-| PayPal Sandbox & APIMatic | Implemented (Live Capture Pending Keys) | Preview context plugin (`paypaldev/server-sdk-context-plugin-preview`) installed; Orders v2 create/capture + webhook verify implemented |
-| File Storage (Supabase Storage) | Implemented (Bucket SQL + Signed URLs) | Private `evidence` bucket SQL (`0004`), MIME/10MB check, URL/notes fallback ready |
-| Deployment (Vercel / Render) | Scheduled (Sprint 8) | Pending production env vars |
+| Next.js / TypeScript Foundation | Verified | `typecheck`, `lint`, `test` (22/22), and `next build` (39 routes) pass |
+| Database Schema & RLS SQL | Blockers (Remote Project/Auth) | CLI lacks `SUPABASE_ACCESS_TOKEN` & `.env.local` holds template placeholders; `supabase/combined_setup.sql` prepared |
+| Authentication (Supabase Auth) | Not Live-Tested (Placeholder Env) | Auth APIs, UI, `proxy.ts`, and RBAC guards verified via unit tests/build |
+| AI Provider (Gemini / OpenAI) | Not Live-Tested (Missing Key) | Deterministic fallback active; `429`/`401`/timeout/schema tested via fetch stubs (`sprint7-env-ai.test.ts`) |
+| PayPal Sandbox & APIMatic | Blocked on Sandbox OAuth (`401`) | Preview plugin installed & `@paypal/paypal-server-sdk@2.5.0` stub-tested; live Sandbox `/v1/oauth2/token` returned `401 invalid_client` |
+| File Storage (Supabase Storage) | Not Live-Tested (Placeholder Env) | Private `evidence` bucket SQL (`0004`) included in `combined_setup.sql`; MIME/10MB guards tested |
+| Deployment (Vercel / Render) | Scheduled (Sprint 8) | Pending live Supabase/Gemini/Sandbox credentials |
 
 ## 5. Known Blockers / Credential Dependencies
-- `.env.local` is not yet configured (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `AI_API_KEY`, `PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET`, `PAYPAL_WEBHOOK_ID`).
+- `.env.local` currently contains template placeholders for Supabase (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`), empty `GEMINI_API_KEY` / `AI_API_KEY`, empty `NEXT_PUBLIC_PAYPAL_CLIENT_ID` & `PAYPAL_WEBHOOK_ID`, and PayPal credentials that return `401 invalid_client` against `api-m.sandbox.paypal.com`.

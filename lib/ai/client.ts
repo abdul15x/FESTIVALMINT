@@ -34,7 +34,13 @@ export type StructuredAiResult<T> =
     }
   | {
       ok: false;
-      reason: 'unconfigured' | 'timeout' | 'provider_error' | 'invalid_schema';
+      reason:
+        | 'unconfigured'
+        | 'timeout'
+        | 'rate_limited'
+        | 'auth_error'
+        | 'provider_error'
+        | 'invalid_schema';
       message: string;
     };
 
@@ -92,9 +98,15 @@ export async function generateStructuredJson<T>(options: {
       });
 
       if (!res.ok) {
+        const reason =
+          res.status === 429
+            ? 'rate_limited'
+            : res.status === 401 || res.status === 403
+              ? 'auth_error'
+              : 'provider_error';
         return {
           ok: false,
-          reason: 'provider_error',
+          reason,
           message: `Gemini API returned HTTP ${res.status}`,
         };
       }
@@ -123,9 +135,15 @@ export async function generateStructuredJson<T>(options: {
       });
 
       if (!res.ok) {
+        const reason =
+          res.status === 429
+            ? 'rate_limited'
+            : res.status === 401 || res.status === 403
+              ? 'auth_error'
+              : 'provider_error';
         return {
           ok: false,
-          reason: 'provider_error',
+          reason,
           message: `OpenAI API returned HTTP ${res.status}`,
         };
       }

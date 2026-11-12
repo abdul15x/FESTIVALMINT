@@ -19,12 +19,14 @@ cp .env.example .env.local
    - **Project URL** → `NEXT_PUBLIC_SUPABASE_URL`
    - **anon / public key** → `NEXT_PUBLIC_SUPABASE_ANON_KEY`
    - **service_role / secret key** → `SUPABASE_SERVICE_ROLE_KEY` *(keep strictly server-side; never prefix with `NEXT_PUBLIC_`)*
-3. Apply the SQL migrations **in order** inside **SQL Editor** (or via Supabase CLI):
-   1. `supabase/migrations/0001_initial_schema.sql` (17 relational tables + triggers)
-   2. `supabase/migrations/0002_rls_policies.sql` (Row Level Security + anti-escalation triggers)
-   3. `supabase/migrations/0003_sponsor_proposals.sql` (Sponsor package selection RLS policy)
-   4. `supabase/migrations/0004_storage_bucket.sql` (Private `evidence` bucket + storage policies)
-   5. `supabase/seed.sql` (Fictional demo university, 2 societies, 3 events, 4 packages, 4 sponsors)
+3. Apply the SQL migrations cleanly in **SQL Editor**:
+   - **Fastest (One-Shot):** Open `supabase/combined_setup.sql`, paste its entire contents into **Supabase Dashboard → SQL Editor**, and click **Run** (executes migrations `0001`–`0004` + `seed.sql` in exact dependency order).
+   - **Or step-by-step in order:**
+     1. `supabase/migrations/0001_initial_schema.sql` (17 relational tables + triggers)
+     2. `supabase/migrations/0002_rls_policies.sql` (Row Level Security + anti-escalation triggers)
+     3. `supabase/migrations/0003_sponsor_proposals.sql` (Sponsor package selection RLS policy)
+     4. `supabase/migrations/0004_storage_bucket.sql` (Private `evidence` bucket + storage policies)
+     5. `supabase/seed.sql` (Fictional demo university, 2 societies, 3 events, 4 packages, 4 sponsors)
 4. Optional — create live Auth demo users (Organizer, Sponsor, Admin):
    ```bash
    node scripts/seed-demo.mjs

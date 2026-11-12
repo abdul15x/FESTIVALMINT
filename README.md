@@ -96,9 +96,9 @@ app/
   admin/                # Dashboard, Moderation Queue, User Moderation
 components/             # Reusable UI primitives, layout shells, domain forms & interactive studios
 lib/                    # env, supabase (client/server/admin/proxy), auth/session, ai/*, matching/*, paypal/*, validation/*
-supabase/migrations/    # 0001_initial_schema.sql .. 0004_storage_bucket.sql + seed.sql
+supabase/               # combined_setup.sql + migrations/ (0001..0004) + seed.sql
 scripts/                # seed-demo.mjs (server-side Auth + demo profile linker)
-tests/                  # Automated unit/contract tests (18 tests across 5 suites)
+tests/                  # Automated unit/contract tests (22 tests across 6 suites)
 ```
 
 ---
@@ -114,7 +114,7 @@ Copy `.env.example` to `.env.local` and follow [CREDENTIALS_SETUP.md](./CREDENTI
 
 ## 11. Database Setup & Demo Seed Data
 
-1. Run SQL files in Supabase SQL Editor in order:
+1. Open [supabase/combined_setup.sql](./supabase/combined_setup.sql) and run the entire script in **Supabase Dashboard → SQL Editor** (or run each migration individually in order):
    - `supabase/migrations/0001_initial_schema.sql`
    - `supabase/migrations/0002_rls_policies.sql`
    - `supabase/migrations/0003_sponsor_proposals.sql`

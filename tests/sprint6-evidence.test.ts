@@ -1,5 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
 import {
   evidenceLinkSchema,
   MAX_EVIDENCE_FILE_BYTES,
@@ -85,4 +87,22 @@ test('buildDeterministicPerformanceReport explicitly flags missing deliverables 
   assert.equal(report.missingDeliverables.length, 2);
   assert.ok(report.verifiedFacts.some((f) => f.includes('Keynote Slide Logo Placement')));
   assert.ok(report.missingDeliverables.some((m) => m.includes('Developer Booth Activation')));
+});
+
+test('0004_storage_bucket.sql defines public.is_admin() safely, keeps evidence private, and avoids destructive drops', () => {
+  const sql = fs.readFileSync(
+    path.join(process.cwd(), 'supabase/migrations/0004_storage_bucket.sql'),
+    'utf8'
+  );
+  const lower = sql.toLowerCase();
+
+  assert.match(lower, /create or replace function public\.is_admin\(\)/);
+  assert.match(lower, /security definer/);
+  assert.match(lower, /set search_path = public/);
+  assert.match(lower, /role\s*=\s*'admin'/);
+  assert.match(lower, /status\s*=\s*'active'/);
+  assert.match(lower, /'evidence',\s*\r?\n\s*'evidence',\s*\r?\n\s*false,/);
+  assert.match(lower, /from pg_policies/);
+  assert.equal(lower.includes('drop table'), false);
+  assert.equal(lower.includes('drop policy'), false);
 });

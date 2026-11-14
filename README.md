@@ -165,4 +165,4 @@ See [TESTING.md](./TESTING.md) for the complete test matrix and 14-point accepta
 
 - Multi-party split payouts / escrow are intentionally excluded (direct Sandbox merchant settlement only).
 - Remote database migrations, live Gemini API calls, and live PayPal Sandbox captures require credentials in `.env.local` (all offline/fallback paths operate honestly and transparently without faking transactions).
-- Licensed under the [MIT License](./LICENSE).
+

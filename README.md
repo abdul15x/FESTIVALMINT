@@ -158,13 +158,6 @@ See [TESTING.md](./TESTING.md) for the complete test matrix and 14-point accepta
 
 ---
 
-## 14. 3-Minute Hackathon Demo Script
-
-1. **Problem & Positioning (`0:00–0:25`):** Show `/` hero and explain how university events connect with aligned brand sponsors in one workflow.
-2. **Organizer Brief & AI Packages (`0:25–1:05`):** Sign in as `organizer.demo@festivalmint.local`, open an event, generate & edit Bronze/Silver/Gold tiers in `PackageStudio`, and submit for verification.
-3. **Sponsor Discovery & Explainable Matching (`1:05–1:50`):** Sign in as `sponsor.demo@festivalmint.local`, browse `/sponsor/discover`, open `BuildFest Campus AI Hackathon 2026 (Demo)`, inspect the 6-factor score breakdown + missing info + AI explanation, and select a package.
-4. **PayPal Sandbox Checkout (`1:50–2:30`):** Complete checkout at `/sponsor/payments/[id]` via PayPal Sandbox popup, show server-verified `COMPLETED` capture ID and auto-seeded deliverables.
-5. **Fulfillment Evidence & AI Report (`2:30–3:00`):** Upload proof at `/organizer/reports/[id]`, generate the performance report, and show how Verified Facts, Organizer Claims, and Missing Deliverables are cleanly separated.
 
 ---
 
